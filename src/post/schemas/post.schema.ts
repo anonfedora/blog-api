@@ -4,9 +4,8 @@ import * as mongoose from "mongoose";
 import { Category } from "../../category/schemas/category.schema";
 import { Comment } from "../../comment/schemas/comment.schema";
 import { User } from "../../user/schemas/user.schema";
-import { Role } from "../enums/role.enum";
 
-export const PostDocument = Post & Document;
+export type PostDocument = Post & Document;
 
 @Schema({ timestamps: true })
 export class Post {

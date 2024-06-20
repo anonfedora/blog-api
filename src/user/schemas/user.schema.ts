@@ -5,7 +5,7 @@ import { Post } from "../../post/schemas/post.schema";
 import { Comment } from "../../comment/schemas/comment.schema";
 import { Role } from "../enums/role.enum";
 
-export const UserDocument = User & Document;
+export type UserDocument = User & Document;
 
 @Schema({ timestamps: true })
 export class User {
