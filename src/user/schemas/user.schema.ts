@@ -18,8 +18,11 @@ export class User {
     @Prop({ required: true, unique: true })
     username: string;
 
-    @Prop({ required: true })
+    @Prop({ required: true, select: false })
     password: string;
+
+    @Prop({ select: false })
+    hash: string;
 
     @Prop({ required: true, default: false })
     isVerified: boolean;
