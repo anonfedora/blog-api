@@ -9,6 +9,7 @@ import { Transform } from "class-transformer";
 import { ApiProperty } from "@nestjs/swagger";
 import { Post } from "../../post/schemas/post.schema";
 import { Comment } from "../../comment/schemas/comment.schema";
+import { lowerCaseTransformer } from "src/utils/transformers/lower-case.transformer";
 import { Role } from "../enums/role.enum";
 
 export class CreateUserDto {
@@ -21,9 +22,11 @@ export class CreateUserDto {
     @ApiProperty({ type: String, example: "eleazar.john.doe@mail.com" })
     @IsEmail()
     @IsNotEmpty()
+    @Transform(lowerCaseTransformer)
     email: string;
 
     @ApiProperty({ type: String, example: "eleazarjd" })
+    @Transform(lowerCaseTransformer)
     @IsNotEmpty()
     username: string;
 
@@ -31,6 +34,9 @@ export class CreateUserDto {
     @IsNotEmpty()
     @MinLength(8)
     password: string;
+
+    @ApiProperty({ type: String, example: "eyJhc702ejjsjhhhJGYg3t70oggk" })
+    hash: string;
 
     @ApiProperty({ type: Boolean, example: false })
     isVerified: boolean;
