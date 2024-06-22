@@ -4,6 +4,8 @@ import * as mongoose from "mongoose";
 import { Post } from "../../post/schemas/post.schema";
 import { Comment } from "../../comment/schemas/comment.schema";
 import { Role } from "../enums/role.enum";
+import crypto from "crypto";
+import * as bcrypt from "bcryptjs";
 
 export type UserDocument = User & Document;
 
@@ -24,6 +26,12 @@ export class User {
     @Prop({ select: false })
     hash: string;
 
+    @Prop({ select: false })
+    passwordResetToken: string;
+
+    @Prop()
+    passwordResetExpires: Date;
+
     @Prop({ required: true, default: false })
     isVerified: boolean;
 
@@ -35,6 +43,42 @@ export class User {
 
     @Prop({ type: String, enum: Role, default: Role.Guest })
     role: Role;
+
+    // Method for generating password reset token
+    createPasswordResetToken() {
+        const resetToken = crypto.randomBytes(32).toString("hex"); // Generate a random hex string
+        this.passwordResetToken = resetToken;
+        this.passwordResetExpires = new Date(Date.now() + 15 * 60 * 1000); // Set expiry time to 1 hour
+        return resetToken;
+    }
 }
 
 export const UserSchema = SchemaFactory.createForClass(User);
+
+UserSchema.pre("save", async function (next) {
+    const user = this as User;
+    try {
+        const saltRounds = 10;
+        const hashedPassword = await bcrypt.hash(user.password, saltRounds);
+        user.password = hashedPassword;
+        next();
+    } catch (err) {
+        return next(err);
+    }
+});
+
+UserSchema.pre("findOneAndUpdate", async function (next) {
+    const update: any = this.getUpdate();
+    if (!update.password) {
+        return next();
+    }
+
+    try {
+        const saltRounds = 10;
+        const hashedPassword = await bcrypt.hash(update.password, saltRounds);
+        update.password = hashedPassword;
+        next();
+    } catch (err) {
+        return next(err);
+    }
+});
