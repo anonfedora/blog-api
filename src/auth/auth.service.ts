@@ -2,7 +2,8 @@ import {
     HttpException,
     Injectable,
     InternalServerErrorException,
-    UnauthorizedException
+    UnauthorizedException,
+    NotFoundException
 } from "@nestjs/common";
 import { UserService } from "../user/user.service";
 import bcrypt from "bcryptjs";
@@ -12,9 +13,13 @@ import { Request, Response } from "express";
 import { UserDocument } from "../user/schemas/user.schema";
 import { NullableType } from "src/utils/types/nullable.type";
 import ms from "ms";
-import crypto from "crypto";
+import * as crypto from "crypto";
 import { uid } from "uid";
 import { MailService } from "../mail/mail.service";
+import { AuthRegisterDto } from "./dto/auth-register.dto";
+import { AuthEmailLoginDto } from "./dto/auth-login.dto";
+import { JwtPayloadType } from "./strategies/types/jwt-payload.type";
+import { LoginResponseType } from "./types/login-response.type";
 
 @Injectable()
 export class AuthService {
@@ -24,5 +29,157 @@ export class AuthService {
         private jwtService: JwtService,
         private mailService: MailService
     ) {}
-    
+
+    async register(authRegisterDto: AuthRegisterDto): Promise<any> {
+        const hash = crypto.createHash("sha256").update(uid(21)).digest("hex");
+        const user = await this.userService.createUser({
+            ...authRegisterDto,
+            hash
+        });
+
+        await this.mailService.userSignUp({
+            to: authRegisterDto.email,
+            data: {
+                hash
+            }
+        });
+        const { token, tokenExpires } = await this.getTokensData({
+            id: user.id
+        });
+        return {
+            token,
+            tokenExpires
+        };
+    }
+
+    // TODO - ForgotPasswordDto
+    async forgotPassword(email: string) {
+        const user = await this.userService.findOne({ email });
+
+        if (!user) {
+            throw new NotFoundException(
+                "There is no user with this email address"
+            );
+        }
+        const resetToken = user.createPasswordResetToken();
+        await user.save({ validateBeforeSave: false });
+
+        try {
+            await this.mailService.forgotPassword({
+                to: user.email,
+                data: {
+                    resetToken
+                }
+            });
+
+            return { success: true, message: "Token sent to your email!" };
+        } catch (error) {
+            user.passwordResetToken = undefined;
+            user.passwordResetExpires = undefined;
+            await user.save({ validateBeforeSave: false });
+            throw new InternalServerErrorException(
+                "There was an error sending the email."
+            );
+        }
+    }
+
+    // TODO - ResetPasswordDto
+    async resetPassword(token: string, password: string) {
+        if (!token || typeof token !== "string") {
+            throw new NotFoundException("Invalid reset token");
+        }
+
+        //const hashedToken = hashSync(token, 10); // Hash the token securely
+        const user = await this.userService.findOne({
+            passwordResetToken: token,
+            passwordResetExpires: { $gt: Date.now() } // Find user with matching hashed token and valid expiration
+        });
+
+        if (!user) {
+            throw new NotFoundException("Invalid or expired reset token");
+        }
+
+        user.password = bcrypt.hashSync(password, 10); // Hash the new password securely
+        user.passwordResetToken = undefined;
+        user.passwordResetExpires = undefined;
+
+        try {
+            await this.mailService.resetPassword({
+                to: user.email,
+                data: null
+            });
+        } catch (error) {
+            throw new InternalServerErrorException(
+                "There was an error sending the email."
+            );
+        }
+        await user.save();
+        return { success: true, message: "Password Reset Successful" };
+    }
+
+    async validateLogin(
+        loginDto: AuthEmailLoginDto,
+        req: Request
+    ): Promise<LoginResponseType> {
+        const user = await this.userService.validateUser({
+            email: loginDto.email
+        });
+
+        const isValidPassword = await bcrypt.compare(
+            user.password,
+            loginDto.password
+        );
+
+        if (!isValidPassword) {
+            throw new HttpException("Email or password is incorrecy", 400);
+        }
+
+        return await this.getTokensData({ id: user.id });
+    }
+
+    async me(
+        userJwtPayload: JwtPayloadType
+    ): Promise<NullableType<UserDocument>> {
+        return this.userService.findOne({
+            _id: userJwtPayload.id
+        });
+    }
+
+    /*async logout(data: JwtPayloadType){
+      
+    }*/
+
+    setCookie(
+        res: Response,
+        cookieName: string,
+        cookieValue: string,
+        maxAge: number
+    ) {
+        const maxAgeInMilliseconds = Number(ms(maxAge));
+        res.cookie(cookieName, cookieValue, {
+            httpOnly: true,
+            sameSite: "strict",
+            maxAge: maxAgeInMilliseconds
+        });
+    }
+
+    private async getTokensData(data: JwtPayloadType) {
+        const tokenExpiresIn = this.configService.getOrThrow("AUTH_EXPIRES", {
+            infer: true
+        });
+        const tokenExpires = Number(Date.now() + ms(tokenExpiresIn));
+
+        const [token] = await Promise.all([
+            await this.jwtService.signAsync(data, {
+                secret: this.configService.getOrThrow("AUTH_SECRET", {
+                    infer: true
+                }),
+                expiresIn: this.configService.getOrThrow("AUTH_EXPIRES")
+            })
+        ]);
+        return {
+            token,
+            tokenExpires
+        };
+    }
 }
