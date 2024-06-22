@@ -11,7 +11,7 @@ import { EntityCondition } from "src/utils/types/entity-condition.type";
 export class UserService {
     constructor(@InjectModel("User") private readonly userModel: Model<User>) {}
 
-    async create(createUserDto: CreateUserDto): Promise<UserDocument> {
+    async createUser(createUserDto: CreateUserDto): Promise<UserDocument> {
         const createdUser = new this.userModel(createUserDto);
         return await createdUser.save();
     }
