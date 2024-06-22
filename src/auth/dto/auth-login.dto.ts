@@ -4,14 +4,14 @@ import { lowerCaseTransformer } from "src/utils/transformers/lower-case.transfor
 import { ApiProperty } from "@nestjs/swagger";
 
 export class AuthEmailLoginDto {
-    @ApiProperty({ type: String, example: "eleazar.john.doe@mail.com" })
+    @ApiProperty({ type: String, example: "dev.mes.anonfedora@gmail.com" })
     @IsString()
     @IsEmail()
     @IsNotEmpty()
     @Transform(lowerCaseTransformer)
     email: string;
 
-    @ApiProperty({ type: String, example: "#1John3y097" })
+    @ApiProperty({ type: String, example: "#1John3y24" })
     @IsString()
     @IsNotEmpty()
     password: string;
