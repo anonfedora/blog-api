@@ -19,18 +19,18 @@ export class CreateUserDto {
     @Length(3, 25)
     name: string;
 
-    @ApiProperty({ type: String, example: "eleazar.john.doe@mail.com" })
+    @ApiProperty({ type: String, example: "dev.mes.anonfedora@gmail.com" })
     @IsEmail()
     @IsNotEmpty()
     @Transform(lowerCaseTransformer)
     email: string;
 
-    @ApiProperty({ type: String, example: "eleazarjd" })
+    @ApiProperty({ type: String, example: "anonfedora" })
     @Transform(lowerCaseTransformer)
     @IsNotEmpty()
     username: string;
 
-    @ApiProperty({ type: String, example: "#1John3y" })
+    @ApiProperty({ type: String, example: "#1John3y24" })
     @IsNotEmpty()
     @MinLength(8)
     password: string;
@@ -38,15 +38,21 @@ export class CreateUserDto {
     @ApiProperty({ type: String, example: "eyJhc702ejjsjhhhJGYg3t70oggk" })
     hash: string;
 
+    @ApiProperty({ type: String, example: "eyJhc702ejjsjhhhJGYg3t70oggk" })
+    passwordResetToken?: string;
+
+    @ApiProperty()
+    passwordResetExpires?: Date;
+
     @ApiProperty({ type: Boolean, example: false })
-    isVerified: boolean;
+    isVerified?: boolean;
 
     @ApiProperty()
-    comments: Comment[];
+    comments?: Comment[];
 
     @ApiProperty()
-    posts: Post[];
+    posts?: Post[];
 
     @ApiProperty()
-    role: Role;
+    role?: Role;
 }
