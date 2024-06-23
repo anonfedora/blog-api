@@ -6,7 +6,7 @@ import {
     NotFoundException
 } from "@nestjs/common";
 import { UserService } from "../user/user.service";
-import bcrypt from "bcryptjs";
+import * as bcrypt from "bcryptjs";
 import { ConfigService } from "@nestjs/config";
 import { JwtService } from "@nestjs/jwt";
 import { Request, Response } from "express";
@@ -30,6 +30,7 @@ export class AuthService {
         private mailService: MailService
     ) {}
 
+    // TODO - Fix tokenExpiresIn
     async register(authRegisterDto: AuthRegisterDto): Promise<any> {
         const hash = crypto.createHash("sha256").update(uid(21)).digest("hex");
         const user = await this.userService.createUser({
@@ -43,13 +44,54 @@ export class AuthService {
                 hash
             }
         });
-        const { token, tokenExpires } = await this.getTokensData({
+        const { token /*tokenExpires*/ } = await this.getTokensData({
             id: user.id
         });
         return {
             token,
-            tokenExpires
+            user
+            /*tokenExpires*/
         };
+    }
+
+    async validateLogin(
+        loginDto: AuthEmailLoginDto,
+        req: Request
+    ): Promise<LoginResponseType> {
+        const user = await this.userService.validateUser({
+            email: loginDto.email
+        });
+
+        const isValidPassword = await bcrypt.compare(
+            user.password,
+            loginDto.password
+        );
+
+        if (!isValidPassword) {
+            throw new HttpException("Email or password is incorrecy", 400);
+        }
+
+        const { token /*tokenExpires*/ } = await this.getTokensData({
+            id: user.id
+        });
+        return {
+            token
+            /*tokenExpires*/
+        };
+    }
+
+    async confirmEmail(hash: string): Promise<void> {
+        const user = await this.userService.validateUser({
+            hash
+        });
+
+        if (!user) {
+            throw new HttpException("User not found", 404);
+        }
+        await this.userService.update(user.id, {
+            isVerified: true,
+            hash: null
+        });
     }
 
     // TODO - ForgotPasswordDto
@@ -61,7 +103,10 @@ export class AuthService {
                 "There is no user with this email address"
             );
         }
-        const resetToken = user.createPasswordResetToken();
+
+        const resetToken = await this.userService.createPasswordResetToken(
+            user.id
+        );
         await user.save({ validateBeforeSave: false });
 
         try {
@@ -71,8 +116,7 @@ export class AuthService {
                     resetToken
                 }
             });
-
-            return { success: true, message: "Token sent to your email!" };
+            /*return { success: true, message: "Token sent to your email!" };*/
         } catch (error) {
             user.passwordResetToken = undefined;
             user.passwordResetExpires = undefined;
@@ -114,27 +158,7 @@ export class AuthService {
             );
         }
         await user.save();
-        return { success: true, message: "Password Reset Successful" };
-    }
-
-    async validateLogin(
-        loginDto: AuthEmailLoginDto,
-        req: Request
-    ): Promise<LoginResponseType> {
-        const user = await this.userService.validateUser({
-            email: loginDto.email
-        });
-
-        const isValidPassword = await bcrypt.compare(
-            user.password,
-            loginDto.password
-        );
-
-        if (!isValidPassword) {
-            throw new HttpException("Email or password is incorrecy", 400);
-        }
-
-        return await this.getTokensData({ id: user.id });
+        /*return { success: true, message: "Password Reset Successful" };*/
     }
 
     async me(
@@ -144,10 +168,6 @@ export class AuthService {
             _id: userJwtPayload.id
         });
     }
-
-    /*async logout(data: JwtPayloadType){
-      
-    }*/
 
     setCookie(
         res: Response,
@@ -163,11 +183,12 @@ export class AuthService {
         });
     }
 
+    // TODO - Fix tokenExpiresIn
     private async getTokensData(data: JwtPayloadType) {
-        const tokenExpiresIn = this.configService.getOrThrow("AUTH_EXPIRES", {
+        /*const tokenExpiresIn = this.configService.getOrThrow("AUTH_EXPIRES", {
             infer: true
         });
-        const tokenExpires = Number(Date.now() + ms(tokenExpiresIn));
+        const tokenExpires = Number(Date.now() + ms(tokenExpiresIn));*/
 
         const [token] = await Promise.all([
             await this.jwtService.signAsync(data, {
@@ -178,8 +199,8 @@ export class AuthService {
             })
         ]);
         return {
-            token,
-            tokenExpires
+            token
+            /*tokenExpires*/
         };
     }
 }
