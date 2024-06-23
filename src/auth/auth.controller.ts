@@ -8,20 +8,31 @@ import {
     Req,
     Request,
     Res,
+    Put,
+    Param,
     UseGuards
 } from "@nestjs/common";
 import { AuthService } from "./auth.service";
+import { UserService } from "../user/user.service";
 import { ConfigService } from "@nestjs/config";
 import { AuthGuard } from "@nestjs/passport";
 import { Response } from "express";
 import { Public } from "src/utils/decorators/public";
 import { NullableType } from "src/utils/types/nullable.type";
-import { UserDocument } from "../user/schemas/user.schema";
+import { UserDocument, User } from "../user/schemas/user.schema";
 import { AuthRegisterDto } from "./dto/auth-register.dto";
 import { LoginResponseType } from "./types/login-response.type";
 import { AuthEmailLoginDto } from "./dto/auth-login.dto";
+import { AuthConfirmEmailDto } from "./dto/auth-confirm-email.dto";
+import { AuthForgotPasswordDto } from "./dto/auth-forgot-password.dto";
+import { AuthResetPasswordDto } from "./dto/auth-reset-password.dto";
+import { UpdateUserDto } from "../user/dto/update-user.dto";
 import ms from "ms";
 import { ApiTags, ApiBearerAuth } from "@nestjs/swagger";
+import { JwtAuthGuard } from "./guards/jwt-auth.guard";
+import { RolesGuard } from "./guards/roles.guard";
+import { Roles } from "../utils/decorators/roles.decorator";
+import { Role } from "../user/enums/role.enum";
 
 @ApiTags("auth")
 @ApiBearerAuth()
@@ -29,6 +40,7 @@ import { ApiTags, ApiBearerAuth } from "@nestjs/swagger";
 export class AuthController {
     constructor(
         private readonly authService: AuthService,
+        private readonly userService: UserService,
         private configService: ConfigService
     ) {}
 
@@ -37,19 +49,91 @@ export class AuthController {
     @HttpCode(HttpStatus.CREATED)
     async register(
         @Body() registerDto: AuthRegisterDto,
-        @Res({ passthrough: true }) response: Response,
-        
+        @Res({ passthrough: true }) response: Response
     ): Promise<LoginResponseType> {
-        const res = await this.authService.register(registerDto, );
+        const res = await this.authService.register(registerDto);
 
         this.authService.setCookie(
             response,
-            "cookie",
+            "access_token",
             res.token,
             this.configService.getOrThrow("REFRESH_EXPIRE", {
                 infer: true
             })
         );
         return res;
+    }
+
+    @Public()
+    @Post("login")
+    @HttpCode(HttpStatus.OK)
+    async login(
+        @Request() req,
+        @Res({ passthrough: true }) response: Response,
+        @Body() loginDto: AuthEmailLoginDto
+    ): Promise<LoginResponseType> {
+        const res = await this.authService.validateLogin(
+            { email: loginDto.email, password: loginDto.password },
+            req
+        );
+
+        this.authService.setCookie(
+            response,
+            "access_token",
+            res.token,
+            this.configService.getOrThrow("REFRESH_EXPIRE", {
+                infer: true
+            })
+        );
+        return res;
+    }
+
+    // TODO - @Body?
+    @Public()
+    @Post("confirm-email")
+    @HttpCode(HttpStatus.OK)
+    async confirmEmail(
+        @Body() confirmEmailDto: AuthConfirmEmailDto
+    ): Promise<void> {
+        return this.authService.confirmEmail(confirmEmailDto.hash);
+    }
+
+    @Public()
+    @Post("forgot-password")
+    @HttpCode(HttpStatus.OK)
+    async forgotPassword(
+        @Body() forgotPasswordDto: AuthForgotPasswordDto
+    ): Promise<void> {
+        return this.authService.forgotPassword(forgotPasswordDto.email);
+    }
+
+    @Public()
+    @Post("reset-password")
+    @HttpCode(HttpStatus.OK)
+    resetPassword(
+        @Body() resetPasswordDto: AuthResetPasswordDto
+    ): Promise<void> {
+        return this.authService.resetPassword(
+            resetPasswordDto.resetToken,
+            resetPasswordDto.password
+        );
+    }
+
+    // TODO - Roles(Guard)
+    @UseGuards(JwtAuthGuard, RolesGuard)
+    @Get("me")
+    @HttpCode(HttpStatus.OK)
+    async me(@Request() request): Promise<NullableType<UserDocument>> {
+        return await this.authService.me(request.user);
+    }
+
+    @UseGuards(JwtAuthGuard, RolesGuard)
+    @Put("update")
+    @HttpCode(HttpStatus.OK)
+    async update(
+        @Param("id") id: string,
+        @Body() updateUserDto: UpdateUserDto
+    ): Promise<NullableType<User>> {
+        return this.userService.update(id, updateUserDto);
     }
 }
