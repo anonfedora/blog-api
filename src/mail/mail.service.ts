@@ -27,15 +27,6 @@ export class MailService {
                 "mail-templates",
                 "activation.hbs"
             ),
-            /*templatePath: path.join(
-                this.configService.getOrThrow("WORK_DIR", {
-                    infer: true
-                }),
-                "src",
-                "mail",
-                "mail-templates",
-                "activation.hbs"
-            ),*/
             context: {
                 title: "Confirmation Mail",
                 url: `${this.configService.get("BASE_URL", {
@@ -54,7 +45,7 @@ export class MailService {
     ): Promise<void> {
         const resetUrl = `${this.configService.getOrThrow(
             "BASE_URL"
-        )}/auth/reset-password?resetToken=${mailData.data.resetToken}`;
+        )}/auth/forgot-password?resetToken=${mailData.data.resetToken}`;
 
         const message = `Your password reset token is:
 ${resetUrl} If you did not request this email, please ignore it.`;
@@ -64,6 +55,9 @@ ${resetUrl} If you did not request this email, please ignore it.`;
             subject: "Password Reset",
             text: message,
             templatePath: path.join(
+                this.configService.getOrThrow("WORK_DIR", {
+                    infer: true
+                }),
                 "src",
                 "mail",
                 "mail-templates",
