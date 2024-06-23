@@ -6,6 +6,7 @@ import { InjectModel } from "@nestjs/mongoose";
 import { User, UserDocument } from "./schemas/user.schema";
 import { NullableType } from "src/utils/types/nullable.type";
 import { EntityCondition } from "src/utils/types/entity-condition.type";
+import * as crypto from "crypto";
 
 @Injectable()
 export class UserService {
@@ -47,5 +48,18 @@ export class UserService {
     async remove(id: UserDocument["id"]): Promise<User> {
         const deletedUser = await this.userModel.findById({ id });
         return deletedUser;
+    }
+
+    // Method for generating password reset token
+    async createPasswordResetToken(userId: string): Promise<string | null> {
+        const user = await this.userModel.findById(userId);
+        if (!user) return null;
+
+        const resetToken = crypto.randomBytes(32).toString("hex"); //
+
+        user.passwordResetToken = resetToken;
+        user.passwordResetExpires = new Date(Date.now() + 15 * 60 * 1000); // Set expiry time to 1 hour
+         await user.save();
+        return resetToken;
     }
 }
