@@ -99,7 +99,7 @@ export class AuthController {
     }
 
     @Public()
-    @Post("forgot-password")
+    @Post("forgot/password")
     @HttpCode(HttpStatus.OK)
     async forgotPassword(
         @Body() forgotPasswordDto: AuthForgotPasswordDto
@@ -108,7 +108,7 @@ export class AuthController {
     }
 
     @Public()
-    @Post("reset-password")
+    @Post("reset/password")
     @HttpCode(HttpStatus.OK)
     resetPassword(
         @Body() resetPasswordDto: AuthResetPasswordDto
