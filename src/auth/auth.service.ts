@@ -44,39 +44,46 @@ export class AuthService {
                 hash
             }
         });
-        const { token /*tokenExpires*/ } = await this.getTokensData({
+        const { token } = await this.getTokensData({
             id: user.id
         });
         return {
             token,
             user
-            /*tokenExpires*/
         };
     }
 
+    // TODO - Change isVerified to true after mail confirmation [confirmEmail]
     async validateLogin(
         loginDto: AuthEmailLoginDto,
         req: Request
-    ): Promise<LoginResponseType> {
+    ): Promise<any> {
         const user = await this.userService.validateUser({
+            isVerified: true,
             email: loginDto.email
         });
 
+        if (!user) {
+            throw new HttpException(
+                "Your email has not been confirmed or you have not registered yet!"
+            );
+        }
+
         const isValidPassword = await bcrypt.compare(
-            user.password,
-            loginDto.password
+            loginDto.password,
+            user.password
         );
 
         if (!isValidPassword) {
-            throw new HttpException("Email or password is incorrecy", 400);
+            throw new HttpException("Email or Password is incorrect!", 400);
         }
 
-        const { token /*tokenExpires*/ } = await this.getTokensData({
+        const { token } = await this.getTokensData({
             id: user.id
         });
+        console.log(isValidPassword, user, token);
         return {
             token
-            /*tokenExpires*/
         };
     }
 
@@ -169,13 +176,13 @@ export class AuthService {
         });
     }
 
-    setCookie(
+    async setCookie(
         res: Response,
         cookieName: string,
         cookieValue: string,
         maxAge: number
     ) {
-        const maxAgeInMilliseconds = Number(ms(maxAge));
+        const maxAgeInMilliseconds = this.configService.getOrThrow("MAX_AGE");
         res.cookie(cookieName, cookieValue, {
             httpOnly: true,
             sameSite: "strict",
