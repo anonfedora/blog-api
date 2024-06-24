@@ -12,6 +12,7 @@ export class MailService {
     ) {}
 
     async userSignUp(mailData: MailData<{ hash: string }>): Promise<void> {
+      const assumedWorkDir = path.join(__dirname, '..'); // Go up one level from current file
         this.mailerService.sendMail({
             to: mailData.to,
             subject: "Confirmation Mail",
@@ -19,9 +20,9 @@ export class MailService {
                 infer: true
             })}/auth/confirm-email?hash=${mailData.data.hash}`,
             templatePath: path.join(
-                this.configService.getOrThrow("WORK_DIR", {
+                /*this.configService.getOrThrow("WORK_DIR", {
                     infer: true
-                }),
+                }),*/assumedWorkDir,
                 "src",
                 "mail",
                 "mail-templates",
