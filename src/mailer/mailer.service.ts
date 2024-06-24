@@ -1,7 +1,7 @@
 import { Injectable } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
 import * as nodemailer from "nodemailer";
-import fs from "node:fs/promises";
+import * as fs from "node:fs/promises";
 import Handlebars from "handlebars";
 
 @Injectable()
@@ -28,6 +28,7 @@ export class MailerService {
     }) {
         //
         let html: string | undefined;
+        console.log(templatePath)
         if (templatePath) {
             const template = await fs.readFile(templatePath, "utf-8");
             html = Handlebars.compile(template, {
