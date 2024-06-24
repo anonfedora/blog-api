@@ -1,36 +1,69 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
-import { PostService } from './post.service';
-import { CreatePostDto } from './dto/create-post.dto';
-import { UpdatePostDto } from './dto/update-post.dto';
+import {
+    Controller,
+    Get,
+    Post,
+    Body,
+    Patch,
+    Param,
+    Delete,
+    Req,
+    Query,
+    UseGuards
+} from "@nestjs/common";
+import { PostService } from "./post.service";
+import { PostDocument } from "./schemas/post.schema";
+import { CreatePostDto } from "./dto/create-post.dto";
+import { UpdatePostDto } from "./dto/update-post.dto";
+import { JwtAuthGuard } from "../auth/guards/jwt-auth.guard";
 import { ApiTags } from "@nestjs/swagger";
 
 @ApiTags("post")
-@Controller('post')
+@Controller("post")
 export class PostController {
-  constructor(private readonly postService: PostService) {}
+    constructor(private readonly postService: PostService) {}
 
-  @Post()
-  create(@Body() createPostDto: CreatePostDto) {
-    return this.postService.create(createPostDto);
-  }
+    //@UseGuards(JwtAuthGuard)
+    @Post("create")
+    async create(
+        @Body() createPostDto: CreatePostDto,
+        @Req() req
+    ): Promise<PostDocument> {
+        return await this.postService.create(createPostDto, req.user.id);
+    }
 
-  @Get()
-  findAll() {
-    return this.postService.findAll();
-  }
+    @Get()
+    async findAll(@Query() query: any) {
+        //const filter = req.query?.userId ? { authorId: req.query.userId } : {};
+        return await this.postService.findAll(query.page, query.limit);
+    }
 
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.postService.findOne(+id);
-  }
+    @Get("user-post/:id")
+    async findUserPost(@Param("id") id: string) {
+        return await this.postService.findUserPost(id);
+    }
 
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updatePostDto: UpdatePostDto) {
-    return this.postService.update(+id, updatePostDto);
-  }
+    @Get(":id")
+    async findOne(@Param("id") id: string) {
+        return await this.postService.findOne(id);
+    }
 
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.postService.remove(+id);
-  }
+    @UseGuards(JwtAuthGuard)
+    @Patch(":id")
+    async update(
+        @Param("id") id: string,
+        @Body() updatePostDto: UpdatePostDto
+    ) {
+        return await this.postService.update(id, updatePostDto);
+    }
+
+    @Get("search")
+    async search(@Query() query: string) {
+        return await this.postService.search(query.search);
+    }
+
+    @UseGuards(JwtAuthGuard)
+    @Delete(":id")
+    async remove(@Param("id") id: string) {
+        return await this.postService.remove(id);
+    }
 }
