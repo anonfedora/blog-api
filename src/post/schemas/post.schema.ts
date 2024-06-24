@@ -19,10 +19,10 @@ export class Post {
     authorId: User;
 
     @Prop({ type: [{ type: mongoose.Schema.Types.ObjectId, ref: "Category" }] })
-    categoryId: Category[];
+    categoryId?: Category;
 
     @Prop({ type: [{ type: mongoose.Schema.Types.ObjectId, ref: "Comment" }] })
-    comments: Comment[];
+    comments?: Comment;
 
     @Prop({ required: false, default: false })
     isPublished: boolean;
