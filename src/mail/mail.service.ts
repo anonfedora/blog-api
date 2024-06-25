@@ -4,6 +4,8 @@ import { ConfigService } from "@nestjs/config";
 import { MailData } from "./interfaces/mail-data.interface";
 import * as path from "path";
 
+const assumedWorkDir = path.join(__dirname, "../.."); // Go up two levels from current file
+const currentDate = new Date().toLocaleString();
 @Injectable()
 export class MailService {
     constructor(
@@ -12,7 +14,7 @@ export class MailService {
     ) {}
 
     async userSignUp(mailData: MailData<{ hash: string }>): Promise<void> {
-      const assumedWorkDir = path.join(__dirname, '..'); // Go up one level from current file
+        //const assumedWorkDir = path.join(__dirname, '..'
         this.mailerService.sendMail({
             to: mailData.to,
             subject: "Confirmation Mail",
@@ -22,7 +24,7 @@ export class MailService {
             templatePath: path.join(
                 /*this.configService.getOrThrow("WORK_DIR", {
                     infer: true
-                }),*/assumedWorkDir,
+                }),*/ assumedWorkDir,
                 "src",
                 "mail",
                 "mail-templates",
@@ -56,9 +58,9 @@ ${resetUrl} If you did not request this email, please ignore it.`;
             subject: "Password Reset",
             text: message,
             templatePath: path.join(
-                this.configService.getOrThrow("WORK_DIR", {
+                /*this.configService.getOrThrow("WORK_DIR", {
                     infer: true
-                }),
+                }),*/ assumedWorkDir,
                 "src",
                 "mail",
                 "mail-templates",
@@ -91,9 +93,9 @@ ${resetUrl} If you did not request this email, please ignore it.`;
             subject: "Password Reset Successful",
             text: message,
             templatePath: path.join(
-                this.configService.getOrThrow("WORK_DIR", {
+                /*this.configService.getOrThrow("WORK_DIR", {
                     infer: true
-                }),
+                }),*/ assumedWorkDir,
                 "src",
                 "mail",
                 "mail-templates",
@@ -108,6 +110,39 @@ ${resetUrl} If you did not request this email, please ignore it.`;
                 app_name: this.configService.get("APP_NAME", { infer: true }),
                 text1: "Reset!",
                 text2: "Password Reset Successful!"
+            }
+        });
+    }
+
+    async loginSuccess(mailData: any): Promise<void> {
+        const message = `Dear ${
+            mailData.name
+        }, Your Login was Successful. Welcome Back! You logged in successfully to Anonfedora Blog on ${currentDate}. If you did not initiate this, change your password immediately or send an email to ${this.configService.getOrThrow(
+            "EMAIL_USER"
+        )}.`;
+
+        this.mailerService.sendMail({
+            to: mailData.to,
+            subject: "Login Success",
+            text: message,
+            templatePath: path.join(
+                /*this.configService.getOrThrow("WORK_DIR", {
+                    infer: true
+                }),*/ assumedWorkDir,
+                "src",
+                "mail",
+                "mail-templates",
+                "activation.hbs"
+            ),
+            context: {
+                title: "Login Successful",
+                url: `${this.configService.get("BASE_URL", {
+                    infer: true
+                })}`,
+                actionTitle: "Login Successful",
+                app_name: this.configService.get("APP_NAME", { infer: true }),
+                text1: message,
+                text2: "Login Successful!"
             }
         });
     }
