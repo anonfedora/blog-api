@@ -18,4 +18,4 @@ export class Comment {
     postId: Post;
 }
 
-export const PostSchema = SchemaFactory.createForClass(Comment);
+export const CommentSchema = SchemaFactory.createForClass(Comment);
