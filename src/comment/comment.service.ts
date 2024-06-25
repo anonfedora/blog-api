@@ -1,26 +1,37 @@
-import { Injectable } from '@nestjs/common';
-import { CreateCommentDto } from './dto/create-comment.dto';
-import { UpdateCommentDto } from './dto/update-comment.dto';
+import { Injectable } from "@nestjs/common";
+import { InjectModel } from "@nestjs/mongoose";
+import { Model } from "mongoose";
+import { CreateCommentDto } from "./dto/create-comment.dto";
+import { UpdateCommentDto } from "./dto/update-comment.dto";
+import { Post } from "../post/schemas/post.schema";
+import { User } from "../user/schemas/user.schema";
+import { CommentDocument } from "./schemas/comment.schema";
 
 @Injectable()
 export class CommentService {
-  create(createCommentDto: CreateCommentDto) {
-    return 'This action adds a new comment';
-  }
+    constructor(
+        @InjectModel("Comment")
+        private readonly commentModel: Model<CommentDocument>
+    ) {}
 
-  findAll() {
-    return `This action returns all comment`;
-  }
+    async create(createCommentDto: CreateCommentDto, post: Post, user: User) {
+        const newComment = new this.commentModel({
+            ...createCommentDto,
+            authorId: user["id"],
+            postId: post["id"]
+        });
+        return await newComment.save();
+    }
 
-  findOne(id: number) {
-    return `This action returns a #${id} comment`;
-  }
+    async getCommentByPost(postId: string) {
+        return await this.commentModel.find({ postId }).populate("authorId");
+    }
 
-  update(id: number, updateCommentDto: UpdateCommentDto) {
-    return `This action updates a #${id} comment`;
-  }
+    async update(id: string, updateCommentDto: UpdateCommentDto) {
+        return `This action updates a #${id} comment`;
+    }
 
-  remove(id: number) {
-    return `This action removes a #${id} comment`;
-  }
+    async remove(id: string) {
+        return `This action removes a #${id} comment`;
+    }
 }
