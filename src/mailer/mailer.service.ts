@@ -9,11 +9,19 @@ export class MailerService {
     private readonly transporter: nodemailer.Transporter;
     constructor(private readonly configService: ConfigService) {
         this.transporter = nodemailer.createTransport({
+            service: configService.get("SERVICE", { infer: true }),
             host: configService.get("EMAIL_HOST", { infer: true }),
             port: configService.get("EMAIL_PORT", { infer: true }),
+            secure: true, // true for 465, false for other ports
+            logger: true,
+            debug: true,
+            secureConnection: false,
             auth: {
                 user: configService.get("EMAIL_USER", { infer: true }),
                 pass: configService.get("EMAIL_PASSWORD", { infer: true })
+            },
+            tls: {
+                rejectUnAuthorized: true
             }
         });
     }
@@ -28,7 +36,7 @@ export class MailerService {
     }) {
         //
         let html: string | undefined;
-        console.log(templatePath)
+        console.log(templatePath);
         if (templatePath) {
             const template = await fs.readFile(templatePath, "utf-8");
             html = Handlebars.compile(template, {
