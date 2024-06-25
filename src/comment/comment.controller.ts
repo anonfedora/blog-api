@@ -1,36 +1,52 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
-import { CommentService } from './comment.service';
-import { CreateCommentDto } from './dto/create-comment.dto';
-import { UpdateCommentDto } from './dto/update-comment.dto';
+import {
+    Controller,
+    Get,
+    Post,
+    Body,
+    Patch,
+    Param,
+    Req,
+    Delete
+} from "@nestjs/common";
+import { CommentService } from "./comment.service";
+import { CreateCommentDto } from "./dto/create-comment.dto";
+import { UpdateCommentDto } from "./dto/update-comment.dto";
+import { PostDocument } from "../post/schemas/post.schema";
 import { ApiTags } from "@nestjs/swagger";
 
 @ApiTags("comment")
-@Controller('comment')
+@Controller("comment")
 export class CommentController {
-  constructor(private readonly commentService: CommentService) {}
+    constructor(private readonly commentService: CommentService) {}
 
-  @Post()
-  create(@Body() createCommentDto: CreateCommentDto) {
-    return this.commentService.create(createCommentDto);
-  }
+    @Post()
+    async create(
+        @Body() createCommentDto: CreateCommentDto,
+        @Param("postId") postId: PostDocument,
+        @Req() req
+    ) {
+        return await this.commentService.create(
+            createCommentDto,
+            postId,
+            req.user
+        );
+    }
 
-  @Get()
-  findAll() {
-    return this.commentService.findAll();
-  }
+    @Get(":postId")
+    async getCommentByPost(@Param("postId") postId: string) {
+        return await this.commentService.getCommentByPost(postId);
+    }
 
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.commentService.findOne(+id);
-  }
+    @Patch(":id")
+    async update(
+        @Param("id") id: string,
+        @Body() updateCommentDto: UpdateCommentDto
+    ) {
+        return await this.commentService.update(id, updateCommentDto);
+    }
 
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateCommentDto: UpdateCommentDto) {
-    return this.commentService.update(+id, updateCommentDto);
-  }
-
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.commentService.remove(+id);
-  }
+    @Delete(":id")
+    async remove(@Param("id") id: string) {
+        return await this.commentService.remove(id);
+    }
 }
