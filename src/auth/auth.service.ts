@@ -68,7 +68,7 @@ export class AuthService {
                 "Your email has not been confirmed or you have not registered yet!",
                 400
             );
-        }//
+        } //
 
         const isValidPassword = await bcrypt.compare(
             loginDto.password,
@@ -82,6 +82,12 @@ export class AuthService {
         const { token } = await this.getTokensData({
             id: user.id
         });
+
+        await this.mailService.loginSuccess({
+            to: user.email,
+            name: user.name
+        });
+
         console.log(isValidPassword, user, token);
         return {
             token,
