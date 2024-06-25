@@ -57,7 +57,7 @@ export class PostController {
     }
 
     @Get("search")
-    async search(@Query() query: string) {
+    async search(@Query() query: any) {
         return await this.postService.search(query.search);
     }
 
