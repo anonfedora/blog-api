@@ -59,15 +59,16 @@ export class AuthService {
         req: Request
     ): Promise<any> {
         const user = await this.userService.validateUser({
-            isVerified: true,
+            isVerified: false,
             email: loginDto.email
         });
 
         if (!user) {
             throw new HttpException(
-                "Your email has not been confirmed or you have not registered yet!"
+                "Your email has not been confirmed or you have not registered yet!",
+                400
             );
-        }
+        }//
 
         const isValidPassword = await bcrypt.compare(
             loginDto.password,
@@ -83,7 +84,8 @@ export class AuthService {
         });
         console.log(isValidPassword, user, token);
         return {
-            token
+            token,
+            user
         };
     }
 
