@@ -48,7 +48,7 @@ export class MailService {
     ): Promise<void> {
         const resetUrl = `${this.configService.getOrThrow(
             "BASE_URL"
-        )}/auth/forgot-password?resetToken=${mailData.data.resetToken}`;
+        )}/auth/forgot/password?resetToken=${mailData.data.resetToken}`;
 
         const message = `Your password reset token is:
 ${resetUrl} If you did not request this email, please ignore it.`;
@@ -70,7 +70,7 @@ ${resetUrl} If you did not request this email, please ignore it.`;
                 title: "Password Reset Token (valid for 15 minutes)",
                 url: `${this.configService.get("BASE_URL", {
                     infer: true
-                })}/auth/reset-password?resetToken=${mailData.data.resetToken}`,
+                })}/auth/reset/password?resetToken=${mailData.data.resetToken}`,
                 actionTitle: "Reset Password",
                 app_name: this.configService.get("APP_NAME", { infer: true }),
                 text1: "Reset!",
