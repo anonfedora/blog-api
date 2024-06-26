@@ -10,6 +10,7 @@ import {
     Res,
     Put,
     Param,
+    Query,
     UseGuards
 } from "@nestjs/common";
 import { AuthService } from "./auth.service";
@@ -92,10 +93,8 @@ export class AuthController {
     @Public()
     @Post("confirm-email")
     @HttpCode(HttpStatus.OK)
-    async confirmEmail(
-        @Body() confirmEmailDto: AuthConfirmEmailDto
-    ): Promise<void> {
-        return this.authService.confirmEmail(confirmEmailDto.hash);
+    async confirmEmail(@Query() query: AuthConfirmEmailDto): Promise<void> {
+        return this.authService.confirmEmail(query.hash);
     }
 
     @Public()
@@ -111,11 +110,13 @@ export class AuthController {
     @Post("reset/password")
     @HttpCode(HttpStatus.OK)
     async resetPassword(
+        @Query() query: AuthResetPasswordDto,
         @Body() resetPasswordDto: AuthResetPasswordDto
     ): Promise<void> {
         return this.authService.resetPassword(
-            resetPasswordDto.resetToken,
-            resetPasswordDto.password
+            query.resetToken,
+            resetPasswordDto.password,
+            resetPasswordDto.confirmPassword
         );
     }
 
@@ -128,7 +129,7 @@ export class AuthController {
     }
 
     @UseGuards(JwtAuthGuard, RolesGuard)
-    @Put("update")
+    @Put("me/update/:id")
     @HttpCode(HttpStatus.OK)
     async update(
         @Param("id") id: string,
