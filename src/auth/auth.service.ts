@@ -143,9 +143,13 @@ export class AuthService {
     }
 
     // TODO - ResetPasswordDto
-    async resetPassword(token: string, password: string) {
+    async resetPassword(token: string, password: string, confirmPassword: string) {
         if (!token || typeof token !== "string") {
             throw new NotFoundException("Invalid reset token");
+        }
+        
+        if (password !== confirmPassword) {
+          throw new HttpException("Passwords do not match!",400)
         }
 
         //const hashedToken = hashSync(token, 10); // Hash the token securely
