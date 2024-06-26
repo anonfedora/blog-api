@@ -180,11 +180,19 @@ export class AuthService {
         /*return { success: true, message: "Password Reset Successful" };*/
     }
 
-    async me(
+    /*async me(
         userJwtPayload: JwtPayloadType
     ): Promise<NullableType<UserDocument>> {
         return this.userService.findOne({
             _id: userJwtPayload.id
+        });
+    }*/
+    
+    async me(
+        id: string
+    ): Promise<NullableType<UserDocument>> {
+        return this.userService.findOne({
+            _id: id
         });
     }
 
