@@ -1,26 +1,40 @@
-import { Injectable } from '@nestjs/common';
-import { CreateCategoryDto } from './dto/create-category.dto';
-import { UpdateCategoryDto } from './dto/update-category.dto';
+import { Injectable } from "@nestjs/common";
+import { InjectModel } from "@nestjs/mongoose";
+import { Model } from "mongoose";
+import { CreateCategoryDto } from "./dto/create-category.dto";
+import { UpdateCategoryDto } from "./dto/update-category.dto";
+import { User } from "../user/schemas/user.schema";
+import { CategoryDocument } from "./schemas/category.schema";
 
 @Injectable()
 export class CategoryService {
-  create(createCategoryDto: CreateCategoryDto) {
-    return 'This action adds a new category';
-  }
+    constructor(
+        @InjectModel("Category")
+        private readonly categoryModel: Model<CategoryDocument>
+    ) {}
 
-  findAll() {
-    return `This action returns all category`;
-  }
+    async create(authorId: any, createCategoryDto: CreateCategoryDto) {
+        const newCategory = await this.categoryModel.create({
+            authorId,
+            ...createCategoryDto
+        });
+        return await newCategory.save();
+    }
 
-  findOne(id: number) {
-    return `This action returns a #${id} category`;
-  }
+    async findAll() {
+        return await this.categoryModel.find();
+    }
 
-  update(id: number, updateCategoryDto: UpdateCategoryDto) {
-    return `This action updates a #${id} category`;
-  }
+    async update(id: string, updateCategoryDto: UpdateCategoryDto) {
+        const updateCat = await this.categoryModel.findByIdAndUpdate(
+            id,
+            updateCategoryDto,
+            { new: true }
+        );
+        return updateCat;
+    }
 
-  remove(id: number) {
-    return `This action removes a #${id} category`;
-  }
+    async remove(id: string) {
+        return await this.categoryModel.findByIdAndDelete(id);
+    }
 }
