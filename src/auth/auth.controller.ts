@@ -121,11 +121,11 @@ export class AuthController {
     }
 
     // TODO - Roles(Guard)
-    @UseGuards(JwtAuthGuard, RolesGuard)
-    @Get("me")
+    //@UseGuards(JwtAuthGuard, RolesGuard)
+    @Get("me/:id")
     @HttpCode(HttpStatus.OK)
-    async me(@Request() request): Promise<NullableType<UserDocument>> {
-        return await this.authService.me(request.user);
+    async me(@Param("id") id: string): Promise<NullableType<UserDocument>> {
+        return await this.authService.me(id);
     }
 
     @UseGuards(JwtAuthGuard, RolesGuard)
