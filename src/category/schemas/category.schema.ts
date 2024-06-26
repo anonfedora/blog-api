@@ -14,7 +14,7 @@ export class Category {
     description: string;
 
     @Prop({ type: mongoose.Schema.Types.ObjectId, ref: "User" })
-    createdBy: User;
+    authorId: User;
 }
 
 export const CategorySchema = SchemaFactory.createForClass(Category);
