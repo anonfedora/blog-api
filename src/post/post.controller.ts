@@ -22,13 +22,13 @@ import { ApiTags } from "@nestjs/swagger";
 export class PostController {
     constructor(private readonly postService: PostService) {}
 
-    //@UseGuards(JwtAuthGuard)
+    // TODO - req.user._id - @UseGuards(JwtAuthGuard)
     @Post("create")
     async create(
         @Body() createPostDto: CreatePostDto,
         @Req() req
     ): Promise<PostDocument> {
-        return await this.postService.create(createPostDto, req.user.id);
+        return await this.postService.create(req.user._id, createPostDto);
     }
 
     @Get()
