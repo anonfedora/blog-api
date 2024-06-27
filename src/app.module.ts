@@ -9,6 +9,7 @@ import { CategoryModule } from "./category/category.module";
 import { ThrottlerModule } from "@nestjs/throttler";
 import { MongooseModule } from "@nestjs/mongoose";
 import { ConfigModule, ConfigService } from "@nestjs/config";
+import { LoggerModule } from './logger/logger.module';
 
 @Module({
     imports: [
@@ -28,7 +29,8 @@ import { ConfigModule, ConfigService } from "@nestjs/config";
         UserModule,
         PostModule,
         CommentModule,
-        CategoryModule
+        CategoryModule,
+        LoggerModule
     ],
     controllers: [AppController],
     providers: [AppService]

@@ -35,6 +35,7 @@ import { RolesGuard } from "./guards/roles.guard";
 import { Roles } from "../utils/decorators/roles.decorator";
 import { Role } from "../user/enums/role.enum";
 import { Throttle } from "@nestjs/throttler";
+import { LoggerService } from "../logger/logger.service";
 
 @ApiTags("auth")
 @ApiBearerAuth()
@@ -43,12 +44,13 @@ export class AuthController {
     constructor(
         private readonly authService: AuthService,
         private readonly userService: UserService,
-        private configService: ConfigService
+        private configService: ConfigService,
+        private readonly logger: LoggerService
     ) {}
 
     @Public()
     @Post("register")
-    @Throttle({default: {limit: 9, ttl: 60000}})
+    @Throttle({ default: { limit: 9, ttl: 60000 } })
     @HttpCode(HttpStatus.CREATED)
     async register(
         @Body() registerDto: AuthRegisterDto,
@@ -64,12 +66,13 @@ export class AuthController {
                 infer: true
             })
         );
+        this.logger.log(`Register new user`, "AuthController");
         return res;
     }
 
     @Public()
     @Post("login")
-    @Throttle({ default: { limit: 3, ttl: 60000 } })
+    @Throttle({ default: { limit: 6, ttl: 60000 } })
     @HttpCode(HttpStatus.OK)
     async login(
         @Request() req,
@@ -89,6 +92,7 @@ export class AuthController {
                 infer: true
             })
         );
+        this.logger.log(`User ${loginDto.email} Login`, "AuthController");
         return res;
     }
 
@@ -97,6 +101,7 @@ export class AuthController {
     @Post("confirm-email")
     @HttpCode(HttpStatus.OK)
     async confirmEmail(@Query() query: AuthConfirmEmailDto): Promise<void> {
+        this.logger.log(`Email confirmation`, "AuthController");
         return this.authService.confirmEmail(query.hash);
     }
 
@@ -107,6 +112,7 @@ export class AuthController {
     async forgotPassword(
         @Body() forgotPasswordDto: AuthForgotPasswordDto
     ): Promise<void> {
+        this.logger.log(`Forgot Password - ${forgotPasswordDto.email}`, "AuthController");
         return this.authService.forgotPassword(forgotPasswordDto.email);
     }
 

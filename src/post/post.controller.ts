@@ -16,11 +16,15 @@ import { CreatePostDto } from "./dto/create-post.dto";
 import { UpdatePostDto } from "./dto/update-post.dto";
 import { JwtAuthGuard } from "../auth/guards/jwt-auth.guard";
 import { ApiTags } from "@nestjs/swagger";
+import { LoggerService } from "../logger/logger.service";
 
 @ApiTags("post")
 @Controller("post")
 export class PostController {
-    constructor(private readonly postService: PostService) {}
+    constructor(
+        private readonly postService: PostService,
+        private readonly logger: LoggerService
+    ) {}
 
     // TODO - req.user._id - @UseGuards(JwtAuthGuard)
     // TODO - req.user.id - JwtPayload
@@ -29,6 +33,9 @@ export class PostController {
         @Body() createPostDto: CreatePostDto,
         @Req() req
     ): Promise<PostDocument> {
+      console.log(req)
+      console.log(req.user)
+        this.logger.log(`Create new post ${createPostDto}`, "PostController");
         return await this.postService.create(req.user._id, createPostDto);
     }
 
@@ -54,6 +61,7 @@ export class PostController {
         @Param("id") id: string,
         @Body() updatePostDto: UpdatePostDto
     ) {
+        this.logger.log(`Update post - ${id}user-post`, "PostController");
         return await this.postService.update(id, updatePostDto);
     }
 
@@ -65,6 +73,7 @@ export class PostController {
     @UseGuards(JwtAuthGuard)
     @Delete(":id")
     async remove(@Param("id") id: string) {
+        this.logger.log(`Delete post`, "PostController");
         return await this.postService.remove(id);
     }
 }

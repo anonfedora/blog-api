@@ -7,6 +7,7 @@ import { PassportModule } from "@nestjs/passport";
 import { JwtStrategy } from "./strategies/jwt.strategy";
 import { MailModule } from "../mail/mail.module";
 import {  ConfigService } from "@nestjs/config";
+import { LoggerModule } from '../logger/logger.module';
 
 @Module({
     imports: [
@@ -19,7 +20,7 @@ import {  ConfigService } from "@nestjs/config";
                 signOptions: { expiresIn: configService.get("AUTH_EXPIRES") }
             }),
             inject: [ConfigService] // Inject ConfigService for dynamic configuration
-        })
+        }),LoggerModule
     ],
     controllers: [AuthController],
     providers: [JwtService, AuthService, JwtStrategy]
