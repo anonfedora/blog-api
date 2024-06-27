@@ -23,6 +23,7 @@ export class PostController {
     constructor(private readonly postService: PostService) {}
 
     // TODO - req.user._id - @UseGuards(JwtAuthGuard)
+    // TODO - req.user.id - JwtPayload
     @Post("create")
     async create(
         @Body() createPostDto: CreatePostDto,

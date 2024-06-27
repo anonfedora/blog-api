@@ -30,7 +30,7 @@ export class PostService {
         const posts = await this.postModel
             .find()
             .skip(skip)
-            .limit(limit)
+            .limit(limit).sort({createdAt:1})
             .exec();
         return {
             data: posts,
