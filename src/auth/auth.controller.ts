@@ -34,6 +34,7 @@ import { JwtAuthGuard } from "./guards/jwt-auth.guard";
 import { RolesGuard } from "./guards/roles.guard";
 import { Roles } from "../utils/decorators/roles.decorator";
 import { Role } from "../user/enums/role.enum";
+import { Throttle } from "@nestjs/throttler";
 
 @ApiTags("auth")
 @ApiBearerAuth()
@@ -47,6 +48,7 @@ export class AuthController {
 
     @Public()
     @Post("register")
+    @Throttle({default: {limit: 9, ttl: 60000}})
     @HttpCode(HttpStatus.CREATED)
     async register(
         @Body() registerDto: AuthRegisterDto,
@@ -67,6 +69,7 @@ export class AuthController {
 
     @Public()
     @Post("login")
+    @Throttle({ default: { limit: 3, ttl: 60000 } })
     @HttpCode(HttpStatus.OK)
     async login(
         @Request() req,
@@ -98,6 +101,7 @@ export class AuthController {
     }
 
     @Public()
+    @Throttle({ default: { limit: 3, ttl: 60000 } })
     @Post("forgot/password")
     @HttpCode(HttpStatus.OK)
     async forgotPassword(
