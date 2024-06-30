@@ -96,9 +96,9 @@ export class AuthController {
         return res;
     }
 
-    // TODO - @Body?
+    // TODO @Body?
     @Public()
-    @Post("confirm-email")
+    @Post("confirmemail")
     @HttpCode(HttpStatus.OK)
     async confirmEmail(@Query() query: AuthConfirmEmailDto): Promise<void> {
         this.logger.log(`Email confirmation`, "AuthController");
@@ -112,7 +112,10 @@ export class AuthController {
     async forgotPassword(
         @Body() forgotPasswordDto: AuthForgotPasswordDto
     ): Promise<void> {
-        this.logger.log(`Forgot Password - ${forgotPasswordDto.email}`, "AuthController");
+        this.logger.log(
+            `Forgot Password ${forgotPasswordDto.email}`,
+            "AuthController"
+        );
         return this.authService.forgotPassword(forgotPasswordDto.email);
     }
 
@@ -130,7 +133,7 @@ export class AuthController {
         );
     }
 
-    // TODO - Roles(Guard)
+    // TODO Roles(Guard)
     //@UseGuards(JwtAuthGuard, RolesGuard)
     @Get("me/:id")
     @HttpCode(HttpStatus.OK)
