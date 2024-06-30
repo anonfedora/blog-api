@@ -17,8 +17,8 @@ export class CommentService {
     async create(createCommentDto: CreateCommentDto, post: Post, user: User) {
         const newComment = new this.commentModel({
             ...createCommentDto,
+            postId: post["id"],
             authorId: user["id"],
-            postId: post["id"]
         });
         return await newComment.save();
     }
