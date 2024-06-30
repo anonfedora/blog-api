@@ -11,19 +11,20 @@ import { LoggerModule } from '../logger/logger.module';
 
 @Module({
     imports: [
-        UserModule,
-        MailModule,
-        PassportModule,
         JwtModule.registerAsync({
             useFactory: async (configService: ConfigService) => ({
                 secret: configService.get("AUTH_SECRET"),
                 signOptions: { expiresIn: configService.get("AUTH_EXPIRES") }
             }),
             inject: [ConfigService] // Inject ConfigService for dynamic configuration
-        }),LoggerModule
+        }),
+        LoggerModule,
+        UserModule,
+        MailModule,
+        PassportModule,
     ],
     controllers: [AuthController],
     providers: [JwtService, AuthService, JwtStrategy]
-    // TODO - AuthService, providers, ?
+    // TODO - AuthService, providers,
 })
 export class AuthModule {}
