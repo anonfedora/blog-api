@@ -38,8 +38,8 @@ new winston.transports.Console({
     ),
   })
   
-  /*new SlackHook({
-    webhookUrl: 'YOUR_SLACK_WEBHOOK_URL',
+  new SlackHook({
+    webhookUrl: 'https://hooks.slack.com/services/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',
     channel: '#logs',
     username: 'LoggerBot',
     level: 'error',
@@ -49,7 +49,7 @@ new winston.transports.Console({
         return `${timestamp} [${context}] ${level}: ${message}${trace ? `\n${trace}` : ''}`;
       }),
     ),
-  }),*/
+  })
   
   /* new winstonMongoDB.MongoDB({
     level: 'info',
