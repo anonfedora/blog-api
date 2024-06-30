@@ -26,16 +26,19 @@ export class PostController {
         private readonly logger: LoggerService
     ) {}
 
-    // TODO - req.user._id - @UseGuards(JwtAuthGuard)
     // TODO - req.user.id - JwtPayload
+    @UseGuards(JwtAuthGuard)
     @Post("create")
     async create(
         @Body() createPostDto: CreatePostDto,
         @Req() req
     ): Promise<PostDocument> {
-      console.log(req)
-      console.log(req.user)
-        this.logger.log(`Create new post ${createPostDto}`, "PostController");
+        this.logger.log(`Create new user post ${req.user}`, "PostController");
+        this.logger.error(
+            `Create new post `,
+            "Post creation error",
+            "PostController"
+        );
         return await this.postService.create(req.user._id, createPostDto);
     }
 
