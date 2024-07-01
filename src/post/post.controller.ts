@@ -39,7 +39,7 @@ export class PostController {
             "Post creation error",
             "PostController"
         );
-        return await this.postService.create(req.user._id, createPostDto);
+        return await this.postService.create(req.user.userId, createPostDto);
     }
 
     @Get()
