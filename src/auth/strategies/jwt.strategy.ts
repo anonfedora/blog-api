@@ -22,6 +22,7 @@ export class JwtStrategy extends PassportStrategy(Strategy, "jwt") {
     }
 
     /* public validate(payload: JwtPayloadType): OrNeverType<JwtPayloadType> {
+        const user = await this.userService.findOne(payload.sub);
         if (!payload.id) {
             throw new UnauthorizedException();
         }
@@ -30,11 +31,7 @@ export class JwtStrategy extends PassportStrategy(Strategy, "jwt") {
     }*/
 
     async validate(payload: any): Promise<any> {
-        const user = await this.userService.findOne(payload.sub);
-        if (!user) {
-            throw new UnauthorizedException("User not found!");
-        }
-        console.log(user);
-        return user;
+      return { userId: payload.sub, username: payload.username };
+        
     }
 }
