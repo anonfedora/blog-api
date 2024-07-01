@@ -14,7 +14,7 @@ export class PostService {
     ) {}
 
     async create(
-        userId: any,
+        userId: string,
         createPostDto: CreatePostDto
     ): Promise<PostDocument> {
         const newPost = await this.postModel.create({
@@ -30,7 +30,8 @@ export class PostService {
         const posts = await this.postModel
             .find()
             .skip(skip)
-            .limit(limit).sort({createdAt:1})
+            .limit(limit)
+            .sort({ createdAt: 1 })
             .exec();
         return {
             data: posts,
@@ -43,11 +44,11 @@ export class PostService {
     async findUserPost(id: string): Promise<Post | null> {
         return await this.postModel
             .findById({ authorId: id })
-            .populate("posts");
+            .populate("posts").exec();
     }
 
     async findOne(id: string): Promise<Post | null> {
-        return await this.postModel.findById(id);
+        return await this.postModel.findById(id).exec();
     }
 
     async update(
