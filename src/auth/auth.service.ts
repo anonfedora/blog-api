@@ -45,11 +45,13 @@ export class AuthService {
             }
         });
         const { token } = await this.getTokensData({
-            id: user.id
+            username: user.username,
+            sub: user._id
         });
+        const { password, ...result } = user;
         return {
             token,
-            user
+            result
         };
     }
 
@@ -80,18 +82,20 @@ export class AuthService {
         }
 
         const { token } = await this.getTokensData({
-            id: user.id
+            username: user.username,
+            sub: user._id
         });
+        const { password, ...result } = user;
 
         await this.mailService.loginSuccess({
             to: user.email,
             name: user.name
         });
 
-        console.log(isValidPassword, user, token);
+        console.log(isValidPassword, result, token);
         return {
             token,
-            user
+            result
         };
     }
 
@@ -143,13 +147,17 @@ export class AuthService {
     }
 
     // TODO - ResetPasswordDto
-    async resetPassword(token: string, password: string, confirmPassword: string) {
+    async resetPassword(
+        token: string,
+        password: string,
+        confirmPassword: string
+    ) {
         if (!token || typeof token !== "string") {
             throw new NotFoundException("Invalid reset token");
         }
-        
+
         if (password !== confirmPassword) {
-          throw new HttpException("Passwords do not match!",400)
+            throw new HttpException("Passwords do not match!", 400);
         }
 
         //const hashedToken = hashSync(token, 10); // Hash the token securely
@@ -187,10 +195,8 @@ export class AuthService {
             _id: userJwtPayload.id
         });
     }*/
-    
-    async me(
-        id: string
-    ): Promise<NullableType<UserDocument>> {
+
+    async me(id: string): Promise<NullableType<UserDocument>> {
         return this.userService.findOne({
             _id: id
         });
@@ -212,11 +218,6 @@ export class AuthService {
 
     // TODO - Fix tokenExpiresIn
     private async getTokensData(data: JwtPayloadType) {
-        /*const tokenExpiresIn = this.configService.getOrThrow("AUTH_EXPIRES", {
-            infer: true
-        });
-        const tokenExpires = Number(Date.now() + ms(tokenExpiresIn));*/
-
         const [token] = await Promise.all([
             await this.jwtService.signAsync(data, {
                 secret: this.configService.getOrThrow("AUTH_SECRET", {
