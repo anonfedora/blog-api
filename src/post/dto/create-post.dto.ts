@@ -28,15 +28,9 @@ export class CreatePostDto {
     @Length(25, 255)
     content: string;
 
-    @ApiProperty({ example: "6678e1fc17d85f46f68ecd83" })
-    @IsMongoId()
-    authorId: User;
 
     @ApiProperty()
-    categoryId: Category[];
-
-    @ApiPropertyOptional({ description: "Collection of comments" })
-    comments: Comment[];
+    categoryId: string;
 
     @ApiProperty({ type: Boolean, example: true })
     isPublished: boolean;
