@@ -4,17 +4,20 @@ import { SwaggerModule, DocumentBuilder } from "@nestjs/swagger";
 import * as cookieParser from "cookie-parser";
 import validationOptions from "./utils/validation-options";
 import { ValidationPipe } from "@nestjs/common";
+import { NestExpressApplication } from "@nestjs/platform-express";
 
 async function bootstrap() {
-    const app = await NestFactory.create(AppModule);
+    const app = await NestFactory.create<NestExpressApplication>(AppModule);
 
     app.useGlobalPipes(new ValidationPipe(validationOptions));
     app.use(cookieParser());
 
     const config = new DocumentBuilder()
         .setTitle("Anonfedora's Blog")
-        .setDescription("Mini Nest Blog API description Documentation")
-        .setVersion("0.1")
+        .setDescription(
+            "Not-too-large Nest Blog API Documentation with Auth, Authorisation, Post, Comment, Categories, User, Mailer, Image Upload with Cloudinary, Logging, Rate Limitting"
+        )
+        .setVersion("1.0")
         .build();
 
     const document = SwaggerModule.createDocument(app, config);
