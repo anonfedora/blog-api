@@ -10,6 +10,7 @@ import { ThrottlerModule } from "@nestjs/throttler";
 import { MongooseModule } from "@nestjs/mongoose";
 import { ConfigModule, ConfigService } from "@nestjs/config";
 import { LoggerModule } from './logger/logger.module';
+import { CloudinaryModule } from './cloudinary/cloudinary.module';
 
 @Module({
     imports: [
@@ -30,7 +31,8 @@ import { LoggerModule } from './logger/logger.module';
         PostModule,
         CommentModule,
         CategoryModule,
-        LoggerModule
+        LoggerModule,
+        CloudinaryModule
     ],
     controllers: [AppController],
     providers: [AppService]
