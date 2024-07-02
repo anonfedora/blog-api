@@ -8,8 +8,11 @@ import {
     Delete,
     Req,
     Query,
-    UseGuards
+    UseGuards,
+    UseInterceptors,
+    UploadedFile
 } from "@nestjs/common";
+import { FileInterceptor } from "@nestjs/platform-express";
 import { PostService } from "./post.service";
 import { PostDocument } from "./schemas/post.schema";
 import { CreatePostDto } from "./dto/create-post.dto";
@@ -17,8 +20,11 @@ import { UpdatePostDto } from "./dto/update-post.dto";
 import { JwtAuthGuard } from "../auth/guards/jwt-auth.guard";
 import { ApiTags } from "@nestjs/swagger";
 import { LoggerService } from "../logger/logger.service";
+import { LikePostDto } from "./dto/like-post.dto";
+import { DislikePostDto } from "./dto/dislike-post.dto";
+import { Express } from 'express'
 
-@ApiTags("post")
+@ApiTags("Post")
 @Controller("post")
 export class PostController {
     constructor(
@@ -29,8 +35,10 @@ export class PostController {
     // TODO - req.user.id - JwtPayload
     @UseGuards(JwtAuthGuard)
     @Post("create")
+    @UseInterceptors(FileInterceptor("image"))
     async create(
         @Body() createPostDto: CreatePostDto,
+        @UploadedFile() file: Express.Multer.File,
         @Req() req
     ): Promise<PostDocument> {
         this.logger.log(`Create new user post ${req.user}`, "PostController");
@@ -39,7 +47,11 @@ export class PostController {
             "Post creation error",
             "PostController"
         );
-        return await this.postService.create(req.user.userId, createPostDto);
+        return await this.postService.create(
+            req.user.userId,
+            createPostDto,
+            file
+        );
     }
 
     @Get()
@@ -62,10 +74,12 @@ export class PostController {
     @Patch(":id")
     async update(
         @Param("id") id: string,
-        @Body() updatePostDto: UpdatePostDto
+        @Body() updatePostDto: UpdatePostDto,
+        @Req() req
     ) {
+        const userId = req.user.userId;
         this.logger.log(`Update post - ${id}user-post`, "PostController");
-        return await this.postService.update(id, updatePostDto);
+        return await this.postService.update(id, updatePostDto, userId);
     }
 
     @Get("search")
@@ -74,9 +88,24 @@ export class PostController {
     }
 
     @UseGuards(JwtAuthGuard)
+    @Post("like")
+    async likePost(@Body() likePostDto: LikePostDto, @Req() req) {
+        const userId = req.user.userId;
+        return this.postService.likePost(likePostDto.postId, userId);
+    }
+
+    @UseGuards(JwtAuthGuard)
+    @Post("dislike")
+    async dislikePost(@Body() dislikePostDto: DislikePostDto, @Req() req) {
+        const userId = req.user.userId;
+        return this.postService.dislikePost(dislikePostDto.postId, userId);
+    }
+
+    @UseGuards(JwtAuthGuard)
     @Delete(":id")
-    async remove(@Param("id") id: string) {
+    async remove(@Param("id") postId: string, @Req() req) {
+        const userId = req.user.userId;
         this.logger.log(`Delete post`, "PostController");
-        return await this.postService.remove(id);
+        return await this.postService.remove(postId, userId);
     }
 }
