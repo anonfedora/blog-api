@@ -16,13 +16,28 @@ export class Post {
     content: string;
 
     @Prop({ type: mongoose.Schema.Types.ObjectId, ref: "User" })
-    authorId: User;
+    authorId: string;
 
     @Prop({ type: [{ type: mongoose.Schema.Types.ObjectId, ref: "Category" }] })
     categoryId?: Category[];
 
     @Prop({ type: [{ type: mongoose.Schema.Types.ObjectId, ref: "Comment" }] })
     comments?: Comment[];
+
+    @Prop({ type: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }] })
+    likes: string[];
+
+    @Prop({ default: 0 })
+    likesCount: number;
+
+    @Prop({ type: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }] })
+    dislikes: string[];
+
+    @Prop({ default: 0 })
+    dislikesCount: number;
+
+    @Prop({})
+    image: string;
 
     @Prop({ required: false, default: false })
     isPublished: boolean;
