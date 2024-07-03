@@ -98,7 +98,7 @@ export class AuthController {
 
     // TODO @Body?
     @Public()
-    @Post("confirmemail")
+    @Post("confirm-email")
     @HttpCode(HttpStatus.OK)
     async confirmEmail(@Query() query: AuthConfirmEmailDto): Promise<void> {
         this.logger.log(`Email confirmation`, "AuthController");

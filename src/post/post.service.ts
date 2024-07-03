@@ -7,12 +7,14 @@ import { Post } from "./schemas/post.schema";
 import { User } from "../user/schemas/user.schema";
 import { PostDocument } from "./schemas/post.schema";
 import { CloudinaryService } from "../cloudinary/cloudinary.service";
+import { NotificationService } from "../notification/notification.service";
 
 @Injectable()
 export class PostService {
     constructor(
         @InjectModel("Post") private readonly postModel: Model<PostDocument>,
-        private readonly cloudinaryService: CloudinaryService
+        private readonly cloudinaryService: CloudinaryService,
+        private readonly notificationService: NotificationService
     ) {}
 
     async create(
@@ -88,6 +90,7 @@ export class PostService {
         return results;
     }
 
+    // TODO - Retrieve user by userid and setn notificationService name to user.name [likePost, dislikePost]
     async likePost(postId: string, userId: string): Promise<Post> {
         const post = await this.postModel.findById(postId);
         if (!post.likes.includes(userId) && post.dislikes.includes(userId)) {
@@ -101,6 +104,10 @@ export class PostService {
             post.dislikes = post.dislikes.filter(id => id.toString() != userId);
             post.likesCount++;
         }
+        await this.notificationService.sendNotification(
+            post.authorId,
+            `${userId} liked your post`
+        );
         return post.save();
     }
 
@@ -117,6 +124,10 @@ export class PostService {
             post.likes = post.likes.filter(id => id.toString() !== userId);
             post.dislikesCount++;
         }
+        await this.notificationService.sendNotification(
+            post.authorId,
+            `${userId} disliked your post`
+        );
         return post.save();
     }
 
