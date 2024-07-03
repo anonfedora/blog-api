@@ -16,6 +16,19 @@ export class Comment {
 
     @Prop({ type: mongoose.Schema.Types.ObjectId, ref: "Post"  })
     postId: Post;
+    
+    //new
+    @Prop({ type: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }] })
+    likes: string[];
+
+    @Prop({ default: 0 })
+    likesCount: number;
+
+    @Prop({ type: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }] })
+    dislikes: string[];
+
+    @Prop({ default: 0 })
+    dislikesCount: number;
 }
 
 export const CommentSchema = SchemaFactory.createForClass(Comment);

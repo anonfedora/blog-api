@@ -12,6 +12,9 @@ import { CommentService } from "./comment.service";
 import { CreateCommentDto } from "./dto/create-comment.dto";
 import { UpdateCommentDto } from "./dto/update-comment.dto";
 import { PostDocument } from "../post/schemas/post.schema";
+import { JwtAuthGuard } from "../auth/guards/jwt-auth.guard";
+import { LikeCommentDto } from "./dto/like-comment.dto";
+import { DislikeCommentDto } from "./dto/dislike-comment.dto";
 import { ApiTags } from "@nestjs/swagger";
 
 @ApiTags("comment")
@@ -43,6 +46,20 @@ export class CommentController {
         @Body() updateCommentDto: UpdateCommentDto
     ) {
         return await this.commentService.update(id, updateCommentDto);
+    }
+    
+     @UseGuards(JwtAuthGuard)
+    @Post("like")
+    async likeComment(@Body() likeCommentDto: LikeCommentDto, @Req() req) {
+        const userId = req.user.userId;
+        return this.commentService.likeComment(likeCommentDto.commentId, userId);
+    }
+
+    @UseGuards(JwtAuthGuard)
+    @Post("dislike")
+    async dislikeComment(@Body() dislikeCommentDto: DislikeCommentDto, @Req() req) {
+        const userId = req.user.userId;
+        return this.commentService.dislikeComment(dislikeCommentDto.commentId, userId);
     }
 
     @Delete(":id")
