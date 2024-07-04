@@ -46,7 +46,7 @@ export class AuthService {
         });
         const { token } = await this.getTokensData({
             username: user.username,
-            sub: user._id
+            sub: user.userId
         });
         const { password, ...result } = user;
         return {
@@ -83,7 +83,7 @@ export class AuthService {
 
         const { token } = await this.getTokensData({
             username: user.username,
-            sub: user._id
+            sub: user.userId
         });
         const { password, ...result } = user;
 
@@ -187,14 +187,6 @@ export class AuthService {
         await user.save();
         /*return { success: true, message: "Password Reset Successful" };*/
     }
-
-    /*async me(
-        userJwtPayload: JwtPayloadType
-    ): Promise<NullableType<UserDocument>> {
-        return this.userService.findOne({
-            _id: userJwtPayload.id
-        });
-    }*/
 
     async me(id: string): Promise<NullableType<UserDocument>> {
         return this.userService.findOne({

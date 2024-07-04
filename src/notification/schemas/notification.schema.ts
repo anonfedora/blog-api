@@ -1,15 +1,13 @@
-import { Schema, Document } from "mongoose";
+import { Schema, SchemaFactory } from "@nestjs/mongoose";
+import { Document } from "mongoose";
+import * as mongoose from "mongoose";
+export type NotificationDocument = Notification & Document;
 
-export interface Notification extends Document {
-    userId: string;
-    message: string;
-    createdAt: Date;
-    isRead: boolean;
+@Schema({ timestamps: true })
+export class Notification {
+    userId: { type: String; required: true };
+    message: { type: String; required: true };
+    isRead: { type: Boolean; default: false };
 }
 
-export const NotificationSchema = new Schema<Notification>({
-    userId: { type: String, required: true },
-    message: { type: String, required: true },
-    createdAt: { type: Date, default: Date.now },
-    isRead: { type: Boolean, default: false },
-});
+export const NotificationSchema = SchemaFactory.createForClass(Notification);

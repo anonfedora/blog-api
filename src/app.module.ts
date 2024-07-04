@@ -11,7 +11,6 @@ import { MongooseModule } from "@nestjs/mongoose";
 import { ConfigModule, ConfigService } from "@nestjs/config";
 import { LoggerModule } from './logger/logger.module';
 import { CloudinaryModule } from './cloudinary/cloudinary.module';
-import { NotificationModule } from './notification/notification.module';
 
 @Module({
     imports: [
@@ -34,7 +33,7 @@ import { NotificationModule } from './notification/notification.module';
         CategoryModule,
         LoggerModule,
         CloudinaryModule,
-        NotificationModule
+        
     ],
     controllers: [AppController],
     providers: [AppService]
