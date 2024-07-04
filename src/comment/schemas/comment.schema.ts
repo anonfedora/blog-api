@@ -12,7 +12,7 @@ export class Comment {
     content: string;
 
     @Prop({ type: mongoose.Schema.Types.ObjectId, ref: "User" })
-    authorId: User;
+    authorId: string;
 
     @Prop({ type: mongoose.Schema.Types.ObjectId, ref: "Post" })
     postId: Post;

@@ -17,11 +17,15 @@ export class CommentService {
         private readonly notificationService: NotificationService
     ) {}
 
-    async create(createCommentDto: CreateCommentDto, post: Post, user: User) {
+    async create(
+        createCommentDto: CreateCommentDto,
+        postId: string,
+        userId: string
+    ) {
         const newComment = new this.commentModel({
             ...createCommentDto,
-            postId: post["id"],
-            authorId: user["id"]
+            postId,
+            authorId: userId
         });
         return await newComment.save();
     }
@@ -30,9 +34,6 @@ export class CommentService {
         return await this.commentModel.find({ postId }).populate("authorId");
     }
 
-    async update(id: string, updateCommentDto: UpdateCommentDto) {
-        return `This action updates a #${id} comment`;
-    }
 
     async likeComment(commentId: string, userId: string): Promise<Comment> {
         const comment = await this.commentModel.findById(commentId);
@@ -54,33 +55,44 @@ export class CommentService {
             );
             comment.likesCount++;
         }
-        await this.notificationService.sendNotification(
+        await this.notificationService.createNotification(
             comment.authorId,
             `${userId} liked your Comment`
         );
         return comment.save();
     }
 
-    async dislikeComment(postId: string, userId: string): Promise<Comment> {
+    async dislikeComment(commentId: string, userId: string): Promise<Comment> {
         const comment = await this.commentModel.findById(commentId);
-        if (!comment.dislikes.includes(userId) && comment.likes.includes(userId)) {
+        if (
+            !comment.dislikes.includes(userId) &&
+            comment.likes.includes(userId)
+        ) {
             comment.dislikes.push(userId);
-            comment.likes = comment.likes.filter(id => id.toString() !== userId);
+            comment.likes = comment.likes.filter(
+                id => id.toString() !== userId
+            );
             comment.dislikesCount++;
             comment.likesCount--;
         }
         if (!comment.dislikes.includes(userId)) {
             comment.dislikes.push(userId);
-            comment.likes = comment.likes.filter(id => id.toString() !== userId);
+            comment.likes = comment.likes.filter(
+                id => id.toString() !== userId
+            );
             comment.dislikesCount++;
         }
-        await this.notificationService.sendNotification(
+        await this.notificationService.createNotification(
             comment.authorId,
             `${userId} disliked your comment`
         );
         return comment.save();
     }
 
+    async update(id: string, updateCommentDto: UpdateCommentDto) {
+        return `This action updates a #${id} comment`;
+    }
+    
     async remove(id: string) {
         return `This action removes a #${id} comment`;
     }

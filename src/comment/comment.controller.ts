@@ -6,6 +6,7 @@ import {
     Patch,
     Param,
     Req,
+    UseGuards,
     Delete
 } from "@nestjs/common";
 import { CommentService } from "./comment.service";
@@ -22,16 +23,18 @@ import { ApiTags } from "@nestjs/swagger";
 export class CommentController {
     constructor(private readonly commentService: CommentService) {}
 
+    @UseGuards(JwtAuthGuard)
     @Post()
     async create(
         @Body() createCommentDto: CreateCommentDto,
-        @Param("postId") postId: PostDocument,
+        @Param("postId") postId: string,
         @Req() req
     ) {
+        const userId = req.user.userId;
         return await this.commentService.create(
             createCommentDto,
             postId,
-            req.user
+            userId
         );
     }
 
@@ -47,19 +50,28 @@ export class CommentController {
     ) {
         return await this.commentService.update(id, updateCommentDto);
     }
-    
-     @UseGuards(JwtAuthGuard)
+
+    @UseGuards(JwtAuthGuard)
     @Post("like")
     async likeComment(@Body() likeCommentDto: LikeCommentDto, @Req() req) {
         const userId = req.user.userId;
-        return this.commentService.likeComment(likeCommentDto.commentId, userId);
+        return this.commentService.likeComment(
+            likeCommentDto.commentId,
+            userId
+        );
     }
 
     @UseGuards(JwtAuthGuard)
     @Post("dislike")
-    async dislikeComment(@Body() dislikeCommentDto: DislikeCommentDto, @Req() req) {
+    async dislikeComment(
+        @Body() dislikeCommentDto: DislikeCommentDto,
+        @Req() req
+    ) {
         const userId = req.user.userId;
-        return this.commentService.dislikeComment(dislikeCommentDto.commentId, userId);
+        return this.commentService.dislikeComment(
+            dislikeCommentDto.commentId,
+            userId
+        );
     }
 
     @Delete(":id")
