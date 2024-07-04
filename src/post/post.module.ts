@@ -7,6 +7,7 @@ import { LoggerModule } from "../logger/logger.module";
 import { MulterModule } from "@nestjs/platform-express";
 import { CloudinaryModule } from "../cloudinary/cloudinary.module";
 import { CloudinaryService } from "../cloudinary/cloudinary.service";
+import { NotificationModule } from "../notification/notification.module";
 import * as multer from "multer";
 
 @Module({
@@ -16,7 +17,8 @@ import * as multer from "multer";
             storage: multer.memoryStorage()
         }),
         LoggerModule,
-        CloudinaryModule
+        CloudinaryModule,
+        NotificationModule
     ],
     controllers: [PostController],
     providers: [PostService, CloudinaryService]

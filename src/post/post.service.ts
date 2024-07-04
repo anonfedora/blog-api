@@ -104,7 +104,7 @@ export class PostService {
             post.dislikes = post.dislikes.filter(id => id.toString() != userId);
             post.likesCount++;
         }
-        await this.notificationService.sendNotification(
+        await this.notificationService.createNotification(
             post.authorId,
             `${userId} liked your post`
         );
@@ -124,7 +124,7 @@ export class PostService {
             post.likes = post.likes.filter(id => id.toString() !== userId);
             post.dislikesCount++;
         }
-        await this.notificationService.sendNotification(
+        await this.notificationService.createNotification(
             post.authorId,
             `${userId} disliked your post`
         );
