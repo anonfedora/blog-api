@@ -46,7 +46,7 @@ export class AuthService {
         });
         const { token } = await this.getTokensData({
             username: user.username,
-            sub: user.userId
+            sub: user._id
         });
         const { password, ...result } = user;
         return {
@@ -83,7 +83,7 @@ export class AuthService {
 
         const { token } = await this.getTokensData({
             username: user.username,
-            sub: user.userId
+            sub: user._id
         });
         const { password, ...result } = user;
 

@@ -18,7 +18,7 @@ import { UserService } from "../user/user.service";
 import { ConfigService } from "@nestjs/config";
 import { AuthGuard } from "@nestjs/passport";
 import { Response } from "express";
-import { Public } from "src/utils/decorators/public";
+import { Public } from "../utils/decorators/public";
 import { NullableType } from "src/utils/types/nullable.type";
 import { UserDocument, User } from "../user/schemas/user.schema";
 import { AuthRegisterDto } from "./dto/auth-register.dto";
