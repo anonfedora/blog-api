@@ -28,11 +28,13 @@ export class PostService {
             imagePath = uploadResult.secure_url;
         }
 
-        const newPost = await this.postModel.create({
-            authorId: userId,
-            ...createPostDto,
-            image: imagePath
-        });
+        const newPost = await this.postModel
+            .create({
+                authorId: userId,
+                ...createPostDto,
+                image: imagePath
+            })
+      //  return newPost;
         return await newPost.save();
     }
 

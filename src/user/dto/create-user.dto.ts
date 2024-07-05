@@ -9,7 +9,7 @@ import { Transform } from "class-transformer";
 import { ApiProperty } from "@nestjs/swagger";
 import { Post } from "../../post/schemas/post.schema";
 import { Comment } from "../../comment/schemas/comment.schema";
-import { lowerCaseTransformer } from "src/utils/transformers/lower-case.transformer";
+import { lowerCaseTransformer } from "../../utils/transformers/lower-case.transformer";
 import { Role } from "../enums/role.enum";
 
 export class CreateUserDto {
