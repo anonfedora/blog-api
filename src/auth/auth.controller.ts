@@ -38,7 +38,7 @@ import { Throttle } from "@nestjs/throttler";
 import { LoggerService } from "../logger/logger.service";
 
 @ApiTags("auth")
-@ApiBearerAuth()
+@ApiBearerAuth("access_token")
 @Controller("auth")
 export class AuthController {
     constructor(
@@ -75,13 +75,13 @@ export class AuthController {
     @Throttle({ default: { limit: 6, ttl: 60000 } })
     @HttpCode(HttpStatus.OK)
     async login(
-        @Request() req,
+        
         @Res({ passthrough: true }) response: Response,
         @Body() loginDto: AuthEmailLoginDto
     ): Promise<LoginResponseType> {
         const res = await this.authService.validateLogin(
             { email: loginDto.email, password: loginDto.password },
-            req
+            
         );
 
         this.authService.setCookie(

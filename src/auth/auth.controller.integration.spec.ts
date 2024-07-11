@@ -6,6 +6,7 @@ import { UserService } from "../user/user.service";
 import { ConfigService } from "@nestjs/config";
 import { INestApplication } from "@nestjs/common";
 import { LoggerService } from "../logger/logger.service";
+import { JwtAuthGuard } from "../auth/guards/jwt-auth.guard";
 
 describe("AuthController (e2e)", () => {
     let app: INestApplication;
@@ -19,6 +20,9 @@ describe("AuthController (e2e)", () => {
         setCookie: jest.fn()
     };
     let userService = { update: jest.fn() };
+    const mockJwtGuard = {
+        canActivate: jest.fn(() => true)
+    };
 
     beforeAll(async () => {
         const moduleFixture: TestingModule = await Test.createTestingModule({
@@ -29,7 +33,10 @@ describe("AuthController (e2e)", () => {
                 { provide: ConfigService, useValue: { getOrThrow: jest.fn() } },
                 { provide: LoggerService, useValue: { log: jest.fn() } }
             ]
-        }).compile();
+        })
+            .overrideGuard(JwtAuthGuard)
+            .useValue(mockJwtGuard)
+            .compile();
 
         app = moduleFixture.createNestApplication();
         await app.init();
@@ -48,5 +55,72 @@ describe("AuthController (e2e)", () => {
             .send(registerDto)
             .expect(201)
             .expect({ token: "access_token" });
+    });
+
+    it("/POST login", () => {
+        const loginDto = { email: "test@example.com", password: "password" };
+        authService.validateLogin.mockResolvedValue({ token: "access_token" });
+
+        return request(app.getHttpServer())
+            .post("/auth/login")
+            .send(loginDto)
+            .expect(200)
+            .expect({ token: "access_token" });
+    });
+
+    it("/POST confirm-email", () => {
+        authService.confirmEmail.mockResolvedValue(undefined);
+
+        return request(app.getHttpServer())
+            .post("/auth/confirm-email?hash=somehash")
+            .expect(200)
+            .expect({});
+    });
+
+    it("/POST forgot/password", () => {
+        const forgotPasswordDto = { email: "test@example.com" };
+        authService.forgotPassword.mockResolvedValue(undefined);
+
+        return request(app.getHttpServer())
+            .post("/auth/forgot/password")
+            .send(forgotPasswordDto)
+            .expect(200)
+            .expect({});
+    });
+
+    it("/POST reset/password", () => {
+        const resetPasswordDto = {
+            password: "newPassword",
+            confirmPassword: "newPassword"
+        };
+        authService.resetPassword.mockResolvedValue(undefined);
+
+        return request(app.getHttpServer())
+            .post("/auth/reset/password?resetToken=sometoken")
+            .send(resetPasswordDto)
+            .expect(200)
+            .expect({});
+    });
+
+    it("/GET me/:id", () => {
+        const user = { _id: "1", email: "test@example.com" };
+        authService.me.mockResolvedValue(user);
+
+        return request(app.getHttpServer())
+            .get("/auth/me/1")
+            .expect(200)
+            .expect(user);
+    });
+
+    it("/PUT me/update/:id", () => {
+        const updateUserDto = { email: "update@example.com" };
+        const user = { _id: "1", email: "update@example.com" };
+        userService.update.mockResolvedValue(user);
+
+        return request(app.getHttpServer())
+            .put("/auth/me/update/1")
+            .send(updateUserDto)
+            .expect(200)
+            .expect(user);
     });
 });

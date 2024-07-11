@@ -3,6 +3,7 @@ import {
     Injectable,
     InternalServerErrorException,
     UnauthorizedException,
+    HttpStatus,
     NotFoundException
 } from "@nestjs/common";
 import { UserService } from "../user/user.service";
@@ -32,6 +33,16 @@ export class AuthService {
 
     // TODO - Fix tokenExpiresIn
     async register(authRegisterDto: AuthRegisterDto): Promise<any> {
+        const existingUser = await this.userService.findOne({
+            email: authRegisterDto.email
+        });
+        if (existingUser) {
+            throw new HttpException(
+                "Email already exists",
+                HttpStatus.BAD_REQUEST
+            );
+        }
+
         const hash = crypto.createHash("sha256").update(uid(21)).digest("hex");
         const user = await this.userService.createUser({
             ...authRegisterDto,
@@ -44,21 +55,28 @@ export class AuthService {
                 hash
             }
         });
-        const { token } = await this.getTokensData({
+
+        const payload: JwtPayloadType = {
             username: user.username,
             sub: user._id
-        });
+        };
+        const { token } = await this.getTokensData(payload);
         const { password, ...result } = user;
         return {
             token,
-            result
+            result: {
+                userId: user._id,
+                name: user.name,
+                email: user.email,
+                username: user.username
+            }
         };
     }
 
     // TODO - Change isVerified to true after mail confirmation [confirmEmail]
     async validateLogin(
         loginDto: AuthEmailLoginDto,
-        req: Request
+        
     ): Promise<any> {
         const user = await this.userService.validateUser({
             isVerified: false,
@@ -81,10 +99,13 @@ export class AuthService {
             throw new HttpException("Email or Password is incorrect!", 400);
         }
 
-        const { token } = await this.getTokensData({
+        const payload: JwtPayloadType = {
             username: user.username,
             sub: user._id
-        });
+        };
+        const { token } = await this.getTokensData(
+            payload
+        );
         const { password, ...result } = user;
 
         await this.mailService.loginSuccess({
@@ -95,7 +116,12 @@ export class AuthService {
         console.log(isValidPassword, result, token);
         return {
             token,
-            result
+            result: {
+                userId: user._id,
+                name: user.name,
+                email: user.email,
+                username: user.username
+            }
         };
     }
 
@@ -160,7 +186,6 @@ export class AuthService {
             throw new HttpException("Passwords do not match!", 400);
         }
 
-        //const hashedToken = hashSync(token, 10); // Hash the token securely
         const user = await this.userService.findOne({
             passwordResetToken: token,
             passwordResetExpires: { $gt: Date.now() } // Find user with matching hashed token and valid expiration
@@ -220,7 +245,6 @@ export class AuthService {
         ]);
         return {
             token
-            /*tokenExpires*/
         };
     }
 }

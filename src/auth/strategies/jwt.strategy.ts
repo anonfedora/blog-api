@@ -7,7 +7,7 @@ import { OrNeverType } from "src/utils/types/or-never.type";
 import { UserService } from "../../user/user.service";
 
 @Injectable()
-export class JwtStrategy extends PassportStrategy(Strategy, "jwt") {
+export class JwtStrategy extends PassportStrategy(Strategy) {
     constructor(
         private readonly configService: ConfigService,
         private readonly userService: UserService
@@ -21,16 +21,23 @@ export class JwtStrategy extends PassportStrategy(Strategy, "jwt") {
         });
     }
 
-    /* public validate(payload: JwtPayloadType): OrNeverType<JwtPayloadType> {
-        const user = await this.userService.findOne(payload.sub);
-        if (!payload.id) {
-            throw new UnauthorizedException();
+    async validate(payload: JwtPayloadType) {
+        const user = this.userService.findById(payload.sub)
+        if (!user){
+          throw new UnauthorizedException()
         }
-        console.log(payload)
-        return payload;
+        return user
+    }
+
+    /* async validate(payload: any) {
+        return { userId: payload.sub, username: payload.username };
     }*/
 
-    async validate(payload: any): Promise<any> {
+    /*async validate(payload: JwtPayloadType): Promise<any> {
+      const user = await this.userService.findById(payload.sub);
+        if (!user) {
+            throw new UnauthorizedException();
+        }
         return { userId: payload.sub, username: payload.username };
-    }
+    }*/
 }
