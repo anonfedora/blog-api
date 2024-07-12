@@ -28,7 +28,6 @@ export class CreatePostDto {
     @Length(25, 255)
     content: string;
 
-
     @ApiProperty()
     categoryId: string;
 

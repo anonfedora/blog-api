@@ -28,13 +28,12 @@ export class PostService {
             imagePath = uploadResult.secure_url;
         }
 
-        const newPost = await this.postModel
-            .create({
-                authorId: userId,
-                ...createPostDto,
-                image: imagePath
-            })
-      //  return newPost;
+        const newPost = await this.postModel.create({
+            authorId: userId,
+            ...createPostDto,
+            image: imagePath
+        });
+        //  return newPost;
         return await newPost.save();
     }
 
@@ -43,6 +42,7 @@ export class PostService {
         const total = await this.postModel.countDocuments();
         const posts = await this.postModel
             .find()
+            .populate("comments")
             .skip(skip)
             .limit(limit)
             .sort({ createdAt: 1 })
@@ -63,7 +63,7 @@ export class PostService {
     }
 
     async findOne(id: string): Promise<Post | null> {
-        return await this.postModel.findById(id).exec();
+        return await this.postModel.findById(id).populate("comments").exec();
     }
 
     async update(
@@ -71,7 +71,7 @@ export class PostService {
         updatePostDto: Partial<UpdatePostDto>,
         userId: string
     ): Promise<Post | null> {
-        const post = await this.postModel.findById(userId);
+        const post = await this.postModel.findById(postId);
         if (post.authorId === userId)
             return await this.postModel.findByIdAndUpdate(
                 postId,
@@ -100,8 +100,7 @@ export class PostService {
             post.dislikes = post.dislikes.filter(id => id.toString() != userId);
             post.likesCount++;
             post.dislikesCount--;
-        }
-        if (!post.likes.includes(userId)) {
+        } else if (!post.likes.includes(userId)) {
             post.likes.push(userId);
             post.dislikes = post.dislikes.filter(id => id.toString() != userId);
             post.likesCount++;

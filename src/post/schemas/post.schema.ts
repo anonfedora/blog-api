@@ -1,5 +1,5 @@
 import { Prop, Schema, SchemaFactory } from "@nestjs/mongoose";
-import { Document } from "mongoose";
+import { Document, Types } from "mongoose";
 import * as mongoose from "mongoose";
 import { Category } from "../../category/schemas/category.schema";
 import { Comment } from "../../comment/schemas/comment.schema";
@@ -15,14 +15,14 @@ export class Post {
     @Prop({ required: true, unique: true })
     content: string;
 
-    @Prop({ type: mongoose.Schema.Types.ObjectId, ref: "User" })
+    @Prop({ type: mongoose.Schema.Types.ObjectId, ref: "User", required: true })
     authorId: string;
 
     @Prop({ type: [{ type: mongoose.Schema.Types.ObjectId, ref: "Category" }] })
     categoryId?: Category[];
 
     @Prop({ type: [{ type: mongoose.Schema.Types.ObjectId, ref: "Comment" }] })
-    comments?: Comment[];
+    comments: Types.Array<Comment>;
 
     @Prop({ type: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }] })
     likes: string[];

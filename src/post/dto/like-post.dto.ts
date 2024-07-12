@@ -5,7 +5,7 @@ export class LikePostDto {
     @ApiProperty({
         type: String,
         description: "Liking a post by logged in user",
-        example: "6678e1fc17d85f46f68ecd83"
+        example: "668fadfb9bad5df501238667"
     })
     @IsString()
     @IsNotEmpty()

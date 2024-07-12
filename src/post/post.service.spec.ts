@@ -7,8 +7,8 @@ import { NotificationService } from "../notification/notification.service";
 import { CreatePostDto } from "./dto/create-post.dto";
 import { UpdatePostDto } from "./dto/update-post.dto";
 import { Model } from "mongoose";
-/*jest.mock("../cloudinary/cloudinary.service");
-jest.mock("../notification/notification.service");*/
+/*jest.mock("../notification/notification.service");*/
+/*jest.mock("../cloudinary/cloudinary.service");*/
 
 const mockPostModel = () => ({
     create: jest.fn(),
@@ -18,7 +18,8 @@ const mockPostModel = () => ({
     findByIdAndUpdate: jest.fn(),
     findByIdAndDelete: jest.fn(),
     exec: jest.fn(),
-    save: jest.fn()
+    save: jest.fn(),
+    populate: jest.fn(),
 });
 
 describe("PostService", () => {
@@ -98,6 +99,7 @@ describe("PostService", () => {
         it("should return all posts", async () => {
             const posts = [{ title: "Test Post", content: "Test Content" }];
             jest.spyOn(model, "find").mockReturnValue({
+                populate: jest.fn().mockReturnThis(),
                 skip: jest.fn().mockReturnThis(),
                 limit: jest.fn().mockReturnThis(),
                 sort: jest.fn().mockReturnThis(),

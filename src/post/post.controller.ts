@@ -22,7 +22,7 @@ import { ApiTags } from "@nestjs/swagger";
 import { LoggerService } from "../logger/logger.service";
 import { LikePostDto } from "./dto/like-post.dto";
 import { DislikePostDto } from "./dto/dislike-post.dto";
-import { Express } from 'express'
+import { Express } from "express";
 
 @ApiTags("Post")
 @Controller("post")
@@ -41,17 +41,15 @@ export class PostController {
         @UploadedFile() file: Express.Multer.File,
         @Req() req
     ): Promise<PostDocument> {
+      const userId = req.user.sub;
         this.logger.log(`Create new user post ${req.user}`, "PostController");
         this.logger.error(
             `Create new post `,
             "Post creation error",
             "PostController"
         );
-        return await this.postService.create(
-            req.user.userId,
-            createPostDto,
-            file
-        );
+        //console.log(req);
+        return await this.postService.create(userId, createPostDto, file);
     }
 
     @Get()
@@ -77,7 +75,7 @@ export class PostController {
         @Body() updatePostDto: UpdatePostDto,
         @Req() req
     ) {
-        const userId = req.user.userId;
+        const userId = req.user.sub;
         this.logger.log(`Update post - ${id}user-post`, "PostController");
         return await this.postService.update(id, updatePostDto, userId);
     }
@@ -90,21 +88,21 @@ export class PostController {
     @UseGuards(JwtAuthGuard)
     @Post("like")
     async likePost(@Body() likePostDto: LikePostDto, @Req() req) {
-        const userId = req.user.userId;
+        const userId = req.user.sub;
         return this.postService.likePost(likePostDto.postId, userId);
     }
 
     @UseGuards(JwtAuthGuard)
     @Post("dislike")
     async dislikePost(@Body() dislikePostDto: DislikePostDto, @Req() req) {
-        const userId = req.user.userId;
+        const userId = req.user.sub;
         return this.postService.dislikePost(dislikePostDto.postId, userId);
     }
 
     @UseGuards(JwtAuthGuard)
     @Delete(":id")
     async remove(@Param("id") postId: string, @Req() req) {
-        const userId = req.user.userId;
+        const userId = req.user.sub;
         this.logger.log(`Delete post`, "PostController");
         return await this.postService.remove(postId, userId);
     }
