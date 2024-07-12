@@ -14,12 +14,12 @@ export class CreateCommentDto {
     @ApiProperty({ type: String, example: "This is a comment on a post" })
     @IsString()
     @IsNotEmpty()
-    @Length(3, 25)
+    @Length(3, 50)
     content: string;
 
-    @ApiProperty()
-    authorId: User;
+    /*  @ApiProperty()
+    authorId: string;
 
     @ApiProperty()
-    postId: Post;
+    postId: Post;*/
 }
