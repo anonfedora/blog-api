@@ -10,12 +10,13 @@ export class NotificationService {
     ) {}
 
     async createNotification(userId: string, message: string): Promise<Notification> {
-        const newNotification = new this.notificationModel({ userId, message });
-        return newNotification.save();
+        const newNotification = await this.notificationModel.create({userId, message });
+        return await newNotification.save();
     }
 
     async getNotificationsForUser(userId: string): Promise<Notification[]> {
         return this.notificationModel.find({ userId }).sort({ createdAt: -1 }).exec();
+        /*return this.notificationModel.find({ userId }).sort({ createdAt: -1 }).exec();*/
     }
 
     async markAsRead(notificationId: string): Promise<Notification> {
