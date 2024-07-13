@@ -6,6 +6,7 @@ import {
     Patch,
     Param,
     Req,
+    Query,
     UseGuards,
     Delete
 } from "@nestjs/common";
@@ -14,6 +15,7 @@ import { CreateCommentDto } from "./dto/create-comment.dto";
 import { UpdateCommentDto } from "./dto/update-comment.dto";
 import { PostDocument } from "../post/schemas/post.schema";
 import { JwtAuthGuard } from "../auth/guards/jwt-auth.guard";
+import { SearchCommentDto } from "./dto/search-comment.dto";
 import { LikeCommentDto } from "./dto/like-comment.dto";
 import { DislikeCommentDto } from "./dto/dislike-comment.dto";
 import { ApiTags } from "@nestjs/swagger";
@@ -24,13 +26,13 @@ export class CommentController {
     constructor(private readonly commentService: CommentService) {}
 
     @UseGuards(JwtAuthGuard)
-    @Post()
+    @Post(":postId")
     async create(
         @Body() createCommentDto: CreateCommentDto,
         @Param("postId") postId: string,
         @Req() req
     ) {
-        const userId = req.user.userId;
+        const userId = req.user.sub;
         return await this.commentService.create(
             createCommentDto,
             postId,
@@ -38,23 +40,56 @@ export class CommentController {
         );
     }
 
-    @Get(":postId")
-    async getCommentByPost(@Param("postId") postId: string) {
-        return await this.commentService.getCommentByPost(postId);
-    }
-
-    @Patch(":id")
+    @UseGuards(JwtAuthGuard)
+    @Patch(":commentId")
     async update(
-        @Param("id") id: string,
-        @Body() updateCommentDto: UpdateCommentDto
+        @Param("commentId") commentId: string,
+        @Body() updateCommentDto: UpdateCommentDto,
+        @Req() req
     ) {
-        return await this.commentService.update(id, updateCommentDto);
+        const userId = req.user.sub;
+        return await this.commentService.update(
+            commentId,
+            updateCommentDto,
+            userId
+        );
     }
 
     @UseGuards(JwtAuthGuard)
+    @Delete(":postId/:commentId")
+    async remove(@Param("postId") postId: string, @Param("commentId") commentId: string, @Req() req) {
+        const userId = req.user.sub;
+        return await this.commentService.remove(postId,commentId, userId);
+    }
+
+    @UseGuards(JwtAuthGuard)
+    @Post("like/:commentId")
+    async likeComment(@Param() likeCommentDto: LikeCommentDto, @Req() req) {
+        const userId = req.user.sub;
+        return this.commentService.likeComment(
+            likeCommentDto.commentId,
+            userId
+        );
+    }
+
+    @UseGuards(JwtAuthGuard)
+    @Post("dislike/:commentId")
+    async dislikeComment(
+        @Param() dislikeCommentDto: DislikeCommentDto,
+        @Req() req
+    ) {
+        const userId = req.user.sub;
+        return this.commentService.dislikeComment(
+            dislikeCommentDto.commentId,
+            userId
+        );
+    }
+    // TODO - Missing await, get likeCommentDto.postId, dislikeCommentDto.postId from Param
+    /* @UseGuards(JwtAuthGuard)
     @Post("like")
     async likeComment(@Body() likeCommentDto: LikeCommentDto, @Req() req) {
-        const userId = req.user.userId;
+        const userId = req.user.sub;
+        console.log(userId);
         return this.commentService.likeComment(
             likeCommentDto.commentId,
             userId
@@ -67,15 +102,26 @@ export class CommentController {
         @Body() dislikeCommentDto: DislikeCommentDto,
         @Req() req
     ) {
-        const userId = req.user.userId;
+        const userId = req.user.sub;
+        console.log(`Comment ${dislikeCommentDto.commentId}, userId${userId}`);
         return this.commentService.dislikeComment(
             dislikeCommentDto.commentId,
             userId
         );
+    }*/
+
+    @Get(":id")
+    async findOne(@Param("id") id: string) {
+        return await this.commentService.findComment(id);
     }
 
-    @Delete(":id")
-    async remove(@Param("id") id: string) {
-        return await this.commentService.remove(id);
+    @Get()
+    async findComments() {
+        return await this.commentService.findAllComments();
+    }
+
+    @Get("search?")
+    async search(@Query("search") query: SearchCommentDto) {
+        return await this.commentService.search(query.search);
     }
 }
