@@ -18,6 +18,15 @@ async function bootstrap() {
             "Not-too-large Nest Blog API Documentation with Auth, Authorisation, Post, Comment, Categories, User, Mailer, Image Upload with Cloudinary, Logging, Rate Limitting"
         )
         .setVersion("1.0")
+        .addBearerAuth(
+            {
+                type: "http",
+                scheme: "bearer",
+                bearerFormat: "JWT",
+                in: "header"
+            },
+            "access_token" // 
+        )
         .build();
 
     const document = SwaggerModule.createDocument(app, config);
