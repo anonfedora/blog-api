@@ -74,10 +74,7 @@ export class AuthService {
     }
 
     // TODO - Change isVerified to true after mail confirmation [confirmEmail]
-    async validateLogin(
-        loginDto: AuthEmailLoginDto,
-        
-    ): Promise<any> {
+    async validateLogin(loginDto: AuthEmailLoginDto): Promise<any> {
         const user = await this.userService.validateUser({
             isVerified: false,
             email: loginDto.email
@@ -103,9 +100,7 @@ export class AuthService {
             username: user.username,
             sub: user._id
         };
-        const { token } = await this.getTokensData(
-            payload
-        );
+        const { token } = await this.getTokensData(payload);
         const { password, ...result } = user;
 
         await this.mailService.loginSuccess({
@@ -182,6 +177,10 @@ export class AuthService {
             throw new NotFoundException("Invalid reset token");
         }
 
+        console.log(
+            `token: ${token}, password: ${password}, confirmPassword: ${confirmPassword}`
+        );
+
         if (password !== confirmPassword) {
             throw new HttpException("Passwords do not match!", 400);
         }
@@ -195,7 +194,7 @@ export class AuthService {
             throw new NotFoundException("Invalid or expired reset token");
         }
 
-        user.password = bcrypt.hashSync(password, 10); // Hash the new password securely
+        user.password = password // Dont Hash the new password - (Pre hash)
         user.passwordResetToken = undefined;
         user.passwordResetExpires = undefined;
 

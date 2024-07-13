@@ -14,8 +14,8 @@ export class AuthResetPasswordDto {
     @IsString()
     confirmPassword: string;
 
-    @ApiProperty({ type: String, example: "eyJhc702ejjsjhhhJGYg3t70oggk" })
+    /*@ApiProperty({ type: String, example: "eyJhc702ejjsjhhhJGYg3t70oggk" })
     @IsNotEmpty()
     @IsString()
-    resetToken: string;
+    resetToken: string;*/
 }

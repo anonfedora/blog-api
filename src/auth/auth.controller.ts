@@ -75,14 +75,13 @@ export class AuthController {
     @Throttle({ default: { limit: 6, ttl: 60000 } })
     @HttpCode(HttpStatus.OK)
     async login(
-        
         @Res({ passthrough: true }) response: Response,
         @Body() loginDto: AuthEmailLoginDto
     ): Promise<LoginResponseType> {
-        const res = await this.authService.validateLogin(
-            { email: loginDto.email, password: loginDto.password },
-            
-        );
+        const res = await this.authService.validateLogin({
+            email: loginDto.email,
+            password: loginDto.password
+        });
 
         this.authService.setCookie(
             response,
@@ -120,14 +119,14 @@ export class AuthController {
     }
 
     @Public()
-    @Post("reset/password")
+    @Post("reset/password/:resetToken")
     @HttpCode(HttpStatus.OK)
     async resetPassword(
-        @Query() query: AuthResetPasswordDto,
+        @Param("resetToken") resetToken: string,
         @Body() resetPasswordDto: AuthResetPasswordDto
     ): Promise<void> {
         return this.authService.resetPassword(
-            query.resetToken,
+            resetToken,
             resetPasswordDto.password,
             resetPasswordDto.confirmPassword
         );
