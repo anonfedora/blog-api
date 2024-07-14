@@ -27,21 +27,23 @@ export class UserService {
             .exec();
     }
 
+    async findById(userId: string): Promise<UserDocument | null> {
+        return await this.userModel.findById(userId).exec();
+    }
+
     async findOne(
         fields: EntityCondition<UserDocument>
     ): Promise<NullableType<UserDocument>> {
         return await this.userModel.findOne({ ...fields });
     }
 
-    async update(
-        id: UserDocument["id"],
-        payload: EntityCondition<UserDocument>
-    ): Promise<User> {
+    async update(userId: string, updateUserDto: UpdateUserDto): Promise<User> {
         const user = await this.userModel.findByIdAndUpdate(
-            id,
-            { ...payload },
+            userId,
+            updateUserDto,
             { new: true }
         );
+        console.log(`Update user ${user}`)
         return user;
     }
 
@@ -59,7 +61,7 @@ export class UserService {
 
         user.passwordResetToken = resetToken;
         user.passwordResetExpires = new Date(Date.now() + 15 * 60 * 1000); // Set expiry time to 1 hour
-         await user.save();
+        await user.save();
         return resetToken;
     }
 }
