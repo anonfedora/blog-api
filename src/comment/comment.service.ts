@@ -170,7 +170,7 @@ export class CommentService {
         }
 
         if (comment.authorId == userId || post.authorId == userId) {
-            return await this.commentModel.findByIdAndRemove(commentId, { new: true });
+            return await this.commentModel.findByIdAndDelete(commentId, { new: true });
         }
     }
 
