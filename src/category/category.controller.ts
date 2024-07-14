@@ -25,7 +25,7 @@ export class CategoryController {
     constructor(private readonly categoryService: CategoryService) {}
 
     @UseGuards(RolesGuard, JwtAuthGuard)
-    @Roles(Role.Admin)
+    @Roles(Role.Guest)
     @Post()
     create(@Req() req, @Body() createCategoryDto: CreateCategoryDto): Promise<Category> {
         const userId = req.user.sub;
