@@ -13,8 +13,8 @@ export class MailerService {
             host: configService.get("EMAIL_HOST", { infer: true }),
             port: configService.get("EMAIL_PORT", { infer: true }),
             secure: true, // true for 465, false for other ports
-            logger: true,
-            debug: true,
+           /* logger: true,
+            debug: true,*/
             secureConnection: false,
             auth: {
                 user: configService.get("EMAIL_USER", { infer: true }),
