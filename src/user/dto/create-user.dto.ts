@@ -45,7 +45,7 @@ export class CreateUserDto {
     passwordResetExpires?: Date;
 
     @ApiProperty({ type: Boolean, example: false })
-    isVerified?: boolean;
+    isVerified: boolean;
 
     @ApiProperty()
     comments?: Comment[];
@@ -54,5 +54,5 @@ export class CreateUserDto {
     posts?: Post[];
 
     @ApiProperty()
-    role?: Role;
+    role: Role;
 }
