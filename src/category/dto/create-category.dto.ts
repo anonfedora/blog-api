@@ -12,11 +12,11 @@ export class CreateCategoryDto {
     @ApiProperty({ type: String, example: "Category" })
     @IsString()
     @IsNotEmpty()
-    @Length(7, 14)
+    @Length(2, 28)
     name: string;
 
     @ApiProperty({ type: String, example: "Category description" })
     @IsString()
-    @Length(7, 14)
+    @Length(7, 48)
     description: string;
 }

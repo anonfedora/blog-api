@@ -37,8 +37,8 @@ export class CategoryController {
         return this.categoryService.findAll();
     }
     
-    @UseGuards(RolesGuard, JwtAuthGuard)
-    @Roles(Role.Admin)
+    @UseGuards(JwtAuthGuard)
+    //@Roles(Role.Admin)
     @Patch(":id")
     update(
         @Param("id") id: string,
@@ -48,8 +48,8 @@ export class CategoryController {
     }
 
 
-    @UseGuards(RolesGuard, JwtAuthGuard)
-    @Roles(Role.Admin)
+    @UseGuards( JwtAuthGuard)
+    //@Roles(Role.Admin)
     @Delete(":id")
     remove(@Param("id") id: string) {
         return this.categoryService.remove(id);
