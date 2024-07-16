@@ -19,7 +19,7 @@ const mockPostModel = () => ({
     findByIdAndDelete: jest.fn(),
     exec: jest.fn(),
     save: jest.fn(),
-    populate: jest.fn(),
+    populate: jest.fn()
 });
 
 describe("PostService", () => {
@@ -122,6 +122,7 @@ describe("PostService", () => {
         it("should return a single post", async () => {
             const post = { title: "Test Post", content: "Test Content" };
             jest.spyOn(model, "findById").mockReturnValue({
+                populate: jest.fn().mockReturnThis(),
                 exec: jest.fn().mockResolvedValue(post)
             } as any);
 
