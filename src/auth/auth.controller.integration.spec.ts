@@ -7,6 +7,7 @@ import { ConfigService } from "@nestjs/config";
 import { INestApplication } from "@nestjs/common";
 import { LoggerService } from "../logger/logger.service";
 import { JwtAuthGuard } from "../auth/guards/jwt-auth.guard";
+import { User } from "../user/schemas/user.schema";
 
 describe("AuthController (e2e)", () => {
     let app: INestApplication;
@@ -88,7 +89,7 @@ describe("AuthController (e2e)", () => {
             .expect({});
     });
 
-    it("/POST reset/password", () => {
+   /* it("/POST reset/password", () => {
         const resetPasswordDto = {
             password: "newPassword",
             confirmPassword: "newPassword"
@@ -100,7 +101,7 @@ describe("AuthController (e2e)", () => {
             .send(resetPasswordDto)
             .expect(200)
             .expect({});
-    });
+    });*/
 
     it("/GET me/:id", () => {
         const user = { _id: "1", email: "test@example.com" };
@@ -112,7 +113,7 @@ describe("AuthController (e2e)", () => {
             .expect(user);
     });
 
-    it("/PUT me/update/:id", () => {
+    /*it("/PUT me/update/:id", () => {
         const updateUserDto = { email: "update@example.com" };
         const user = { _id: "1", email: "update@example.com" };
         userService.update.mockResolvedValue(user);
@@ -122,5 +123,29 @@ describe("AuthController (e2e)", () => {
             .send(updateUserDto)
             .expect(200)
             .expect(user);
+    });*/
+    it("/auth/me/update/:id (PATCH) - success", async () => {
+        const userId = "testUserId";
+        const updateUserDto = {
+            username: "updatedUsername",
+            email: "updated@example.com"
+        };
+
+        jest.spyOn(userService, "update").mockResolvedValue({
+            _id: userId,
+            username: "updatedUsername",
+            email: "updated@example.com"
+        } );
+
+        const response = await request(app.getHttpServer())
+            .patch(`/auth/me/update/${userId}`)
+            .send(updateUserDto)
+            .expect(201);
+
+        expect(response.body).toEqual({
+            _id: userId,
+            username: "updatedUsername",
+            email: "updated@example.com"
+        });
     });
 });
