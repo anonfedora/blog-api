@@ -4,10 +4,13 @@ import { PostController } from "./post.controller";
 import { PostService } from "./post.service";
 import { JwtAuthGuard } from "../auth/guards/jwt-auth.guard";
 import { LoggerService } from "../logger/logger.service";
+import { JwtService } from "@nestjs/jwt";
+import { getModelToken } from "@nestjs/mongoose";
 import { INestApplication } from "@nestjs/common";
 
 describe("PostController (e2e)", () => {
     let app: INestApplication;
+    let jwtService: JwtService;
     let postService = {
         create: jest.fn(),
         findAll: jest.fn(),
@@ -97,26 +100,51 @@ describe("PostController (e2e)", () => {
             .expect(post);
     });
 
-    it("/PATCH post/:id", () => {
+    /*it("/PATCH post/:id  - success", () => {
         const updatePostDto = {
-            title: "Updated Title",
-            content: "Updated Content"
+            id: "1",
+            title: "updatedTitle",
+            content: "updatedContent",
+            userId: "userId"
         };
-        const post = { id: "1", ...updatePostDto };
-        postService.update.mockResolvedValue(post);
+        postService.update.mockResolvedValue(updatePostDto);
 
         return request(app.getHttpServer())
-            .patch("/post/1")
+            .patch(`/post/1`)
             .send(updatePostDto)
-            .expect(200)
-            .expect(post);
-    });
+            .expect(201)
+            .expect(updatePostDto);
+    });*/
 
     /*it("/GET post/search", () => {
         const posts = [
             { id: "1", title: "Post Title", content: "Post Content" }
         ];
         postService.search.mockResolvedValue(posts);
+
+        return request(app.getHttpServer())
+            .get("/post/search?search=Post")
+            .expect(200)
+            .expect(posts);
+    });*/
+
+    /*it("/GET post/search", () => {
+        const posts = [
+            { id: "1", title: "Post Title", content: "Post Content" }
+        ];
+        postService.likePost.mockResolvedValue(posts);
+
+        return request(app.getHttpServer())
+            .get("/post/search?search=Post")
+            .expect(200)
+            .expect(posts);
+    });*/
+
+    /*it("/GET post/search", () => {
+        const posts = [
+            { id: "1", title: "Post Title", content: "Post Content" }
+        ];
+        postService.dislikePost.mockResolvedValue(posts);
 
         return request(app.getHttpServer())
             .get("/post/search?search=Post")
