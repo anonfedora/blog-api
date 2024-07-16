@@ -9,6 +9,7 @@ import {
     Request,
     Res,
     Put,
+    Patch,
     Param,
     Query,
     UseGuards
@@ -78,7 +79,7 @@ export class AuthController {
         @Res({ passthrough: true }) response: Response,
         @Body() loginDto: AuthEmailLoginDto
     ): Promise<LoginResponseType> {
-        const res = await this.authService.validateLogin({
+       try {const res = await this.authService.validateLogin({
             email: loginDto.email,
             password: loginDto.password
         });
@@ -92,7 +93,10 @@ export class AuthController {
             })
         );
         this.logger.log(`User ${loginDto.email} Login`, "AuthController");
-        return res;
+        return res;} catch (error){
+          this.logger.error(`Login `, error, "AuthController");
+            throw new Error("Login error" + error);
+        }
     }
 
     // TODO @Body?
@@ -141,12 +145,14 @@ export class AuthController {
     }
 
     @UseGuards(JwtAuthGuard, RolesGuard)
-    @Put("me/update/:id")
-    @HttpCode(HttpStatus.OK)
+    @Patch("me/update/:id")
+    @HttpCode(HttpStatus.CREATED)
     async update(
+        //@Req() req,
         @Param("id") id: string,
         @Body() updateUserDto: UpdateUserDto
-    ): Promise<NullableType<User>> {
+    ): Promise<User> {
+        ///const userId = req.user.sub;
         return this.userService.update(id, updateUserDto);
     }
 }
