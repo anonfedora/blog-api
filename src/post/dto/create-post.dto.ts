@@ -28,7 +28,11 @@ export class CreatePostDto {
     @Length(25, 255)
     content: string;
 
-    @ApiProperty()
+    @ApiProperty({
+        type: String,
+        example: "6693222730d3c66ed76ea61d"
+    })
+    @IsString()
     categoryId: string;
 
     @ApiProperty({ type: Boolean, example: true })

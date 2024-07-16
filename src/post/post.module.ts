@@ -12,11 +12,14 @@ import { NotificationModule } from "../notification/notification.module";
 import { JwtModule, JwtService } from "@nestjs/jwt";
 import { ConfigService } from "@nestjs/config";
 import * as multer from "multer";
+import { Category, CategorySchema } from '../category/schemas/category.schema';
+
 
 @Module({
     imports: [
         MongooseModule.forFeature([{ name: "Post", schema: PostSchema }]),
         MongooseModule.forFeature([{ name: "Comment", schema: CommentSchema }]),
+        MongooseModule.forFeature([{ name: "Category", schema: CategorySchema }]),
         MulterModule.register({
             storage: multer.memoryStorage()
         }),

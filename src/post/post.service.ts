@@ -42,7 +42,7 @@ export class PostService {
         const total = await this.postModel.countDocuments();
         const posts = await this.postModel
             .find()
-            .populate("comments")
+            .populate("comments categoryId", "name")
             .skip(skip)
             .limit(limit)
             .sort({ createdAt: 1 })
@@ -58,12 +58,23 @@ export class PostService {
     async findUserPost(id: string): Promise<Post | null> {
         return await this.postModel
             .findById({ authorId: id })
-            .populate("posts")
+            .populate("posts categoryId", "name")
+            .exec();
+    }
+
+    // TODO - Retrieve all comments for a specific post.
+    async getCommentsByPost(postId: string) {
+        return await this.postModel
+            .find({ _id: postId })
+            .populate("comments categoryId", "content name")
             .exec();
     }
 
     async findOne(id: string): Promise<Post | null> {
-        return await this.postModel.findById(id).populate("comments").exec();
+        return await this.postModel
+            .findById(id)
+            .populate("comments categoryId", "content likesCount dislikesCount name")
+            .exec();
     }
 
     async update(
@@ -72,7 +83,11 @@ export class PostService {
         userId: string
     ): Promise<Post | null> {
         const post = await this.postModel.findById(postId);
-        if (post.authorId === userId)
+
+        /*console.log(post);
+        console.log(post.authorId + "," + userId + "......");
+        console.log(post.authorId == userId);*/
+        if (post.authorId == userId)
             return await this.postModel.findByIdAndUpdate(
                 postId,
                 updatePostDto,
@@ -134,7 +149,7 @@ export class PostService {
 
     async remove(postId: string, userId: string): Promise<Post | null> {
         const post = await this.postModel.findById(postId);
-        if (post.authorId === userId)
+        if (post.authorId == userId)
             return await this.postModel.findByIdAndDelete(postId);
     }
 }

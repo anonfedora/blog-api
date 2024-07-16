@@ -18,13 +18,14 @@ import { PostDocument } from "./schemas/post.schema";
 import { CreatePostDto } from "./dto/create-post.dto";
 import { UpdatePostDto } from "./dto/update-post.dto";
 import { JwtAuthGuard } from "../auth/guards/jwt-auth.guard";
-import { ApiTags } from "@nestjs/swagger";
+import { ApiTags, ApiBearerAuth } from "@nestjs/swagger";
 import { LoggerService } from "../logger/logger.service";
 import { LikePostDto } from "./dto/like-post.dto";
 import { DislikePostDto } from "./dto/dislike-post.dto";
 import { Express } from "express";
 
 @ApiTags("Post")
+@ApiBearerAuth("access_token")
 @Controller("post")
 export class PostController {
     constructor(
@@ -41,15 +42,23 @@ export class PostController {
         @UploadedFile() file: Express.Multer.File,
         @Req() req
     ): Promise<PostDocument> {
-      const userId = req.user.sub;
-        this.logger.log(`Create new user post ${req.user}`, "PostController");
-        this.logger.error(
-            `Create new post `,
-            "Post creation error",
-            "PostController"
-        );
-        //console.log(req);
-        return await this.postService.create(userId, createPostDto, file);
+        const userId = req.user.sub;
+        try {
+            this.logger.log(
+                `Create new user post ${req.user}`,
+                "PostController"
+            );
+            this.logger.error(
+                `Create new post `,
+                "Post creation error",
+                "PostController"
+            );
+            //console.log(req);
+            return await this.postService.create(userId, createPostDto, file);
+        } catch (error) {
+            this.logger.error(`Create new post `, error, "PostController");
+            throw new Error("Post Creation error"+error)
+        }
     }
 
     @Get()
@@ -61,6 +70,11 @@ export class PostController {
     @Get("user-post/:id")
     async findUserPost(@Param("id") id: string) {
         return await this.postService.findUserPost(id);
+    }
+
+    @Get("comments/:postId")
+    async getCommentByPost(@Param("postId") postId: string) {
+        return await this.postService.getCommentsByPost(postId);
     }
 
     @Get(":id")
