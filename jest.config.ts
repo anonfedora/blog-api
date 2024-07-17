@@ -42,14 +42,6 @@ const config: Config = {
   //   "lcov",
   //   "clover"
   // ],
-  
-  {
-  "jest": {
-    "transformIgnorePatterns": [
-      "node_modules/(?!@ngrx|(?!deck.gl)|ng-dynamic)"
-    ]
-  }
-},
 
   // An object that configures minimum threshold enforcement for coverage results
   // coverageThreshold: undefined,
