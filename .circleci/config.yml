@@ -1,19 +1,71 @@
 version: 2.1
-jobs:
-  blog_api_deployment_process:
+
+executors:
+  node-executor:
     docker:
-      - image: cimg/node:19.8.1
+      - image: circleci/node:14
+    working_directory: ~/repo
+
+jobs:
+  # Job for installing dependencies and running tests
+  test:
+    executor: node-executor
     steps:
       - checkout
+      - restore_cache:
+          keys:
+            - v1-dependencies-{{ checksum "package.json" }}
+            - v1-dependencies-
       - run:
-          name: npm update
-          command: sudo npm install -g npm@latest
+          name: Install Dependencies
+          command: npm install
+      - save_cache:
+          paths:
+            - node_modules
+          key: v1-dependencies-{{ checksum "package.json" }}
       - run:
-          name: run automated tests
+          name: Run Tests
           command: npm test
 
+  # Job for building the application
+  build:
+    executor: node-executor
+    steps:
+      - checkout
+      - restore_cache:
+          keys:
+            - v1-dependencies-{{ checksum "package.json" }}
+            - v1-dependencies-
+      - run:
+          name: Install Dependencies
+          command: npm install
+      - run:
+          name: Build Application
+          command: npm run build
+      - persist_to_workspace:
+          root: .
+          paths:
+            - dist
+
+  # Job for deploying the application
+  deploy:
+    docker:
+      - image: circleci/node:14
+    steps:
+      - attach_workspace:
+          at: ~/repo
 
 workflows:
-  blog-demo: 
+  version: 2
+  test_and_deploy:
     jobs:
-      - blog_api_deployment_process
+      - test
+      - build:
+          requires:
+            - test
+      - deploy:
+          requires:
+            - build
+          filters:
+            branches:
+              only: main
