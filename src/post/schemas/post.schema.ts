@@ -39,7 +39,7 @@ export class Post {
     @Prop({})
     image: string;
 
-    @Prop({ required: false, default: false })
+    @Prop({ default: false })
     isPublished: boolean;
 }
 
