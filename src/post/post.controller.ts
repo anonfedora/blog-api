@@ -18,9 +18,11 @@ import { PostDocument } from "./schemas/post.schema";
 import { CreatePostDto } from "./dto/create-post.dto";
 import { UpdatePostDto } from "./dto/update-post.dto";
 import { JwtAuthGuard } from "../auth/guards/jwt-auth.guard";
-import { ApiTags, ApiBearerAuth , ApiResponse} from "@nestjs/swagger";
+import { ApiTags, ApiBearerAuth, ApiResponse } from "@nestjs/swagger";
 import { LoggerService } from "../logger/logger.service";
-import { PostResponseDto } from "./dto/post-response.dto";
+import { RolesGuard } from "./guards/roles.guard";
+import { Roles } from "../utils/decorators/roles.decorator";
+import { Role } from "../user/enums/role.enum";
 import { LikePostDto } from "./dto/like-post.dto";
 import { DislikePostDto } from "./dto/dislike-post.dto";
 import { Express } from "express";
@@ -38,12 +40,12 @@ export class PostController {
     @UseGuards(JwtAuthGuard)
     @Post("create")
     @UseInterceptors(FileInterceptor("image"))
-    @ApiResponse({ status: 201, type: PostResponseDto })
+    //@ApiResponse({ status: 201, type: PostDocument })
     async create(
         @Body() createPostDto: CreatePostDto,
         @UploadedFile() file: Express.Multer.File,
         @Req() req
-    ): Promise<PostResponseDto> {
+    ): Promise<PostDocument> {
         const userId = req.user.sub;
         try {
             this.logger.log(
@@ -64,8 +66,8 @@ export class PostController {
     }
 
     @Get()
-    @ApiResponse({ status: 200, type: [PostResponseDto] })
-    async findAll(@Query() query: any): Promise<PostResponseDto[]> {
+    //@ApiResponse({ status: 200, type: [PostDocument] })
+    async findAll(@Query() query: any): Promise<any> {
         return await this.postService.findAll(query.page, query.limit);
     }
 
@@ -80,27 +82,27 @@ export class PostController {
     }
 
     @Get(":id")
-    @ApiResponse({ status: 200, type: PostResponseDto })
-    async findOne(@Param("id") id: string): Promise<PostResponseDto> {
+    //@ApiResponse({ status: 200, type: PostDocument })
+    async findOne(@Param("id") id: string) {
         return await this.postService.findOne(id);
     }
 
     @UseGuards(JwtAuthGuard)
     @Patch(":id")
-    @ApiResponse({ status: 200, type: PostResponseDto })
+    //@ApiResponse({ status: 200, type: PostDocument })
     async update(
         @Param("id") id: string,
         @Body() updatePostDto: UpdatePostDto,
         @Req() req
-    ): Promise<PostResponseDto> {
+    ): Promise<any> {
         const userId = req.user.sub;
         this.logger.log(`Update post - ${id}user-post`, "PostController");
         return await this.postService.update(id, updatePostDto, userId);
     }
 
     @Get("search")
-    @ApiResponse({ status: 200, type: [PostResponseDto] })
-    async search(@Query() query: any): Promise<PostResponseDto[]> {
+    //@ApiResponse({ status: 200, type: [PostDocument] })
+    async search(@Query() query: any): Promise<any> {
         return await this.postService.search(query.search);
     }
 
@@ -120,11 +122,11 @@ export class PostController {
 
     @UseGuards(JwtAuthGuard)
     @Delete(":id")
-    @ApiResponse({ status: 200, type: PostResponseDto })
+    //@ApiResponse({ status: 200, type: PostDocument })
     async remove(
         @Param("id") postId: string,
         @Req() req
-    ): Promise<PostResponseDto> {
+    ): Promise<any> {
         const userId = req.user.sub;
         this.logger.log(`Delete post`, "PostController");
         return await this.postService.remove(postId, userId);

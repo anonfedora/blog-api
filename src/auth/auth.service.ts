@@ -76,7 +76,7 @@ export class AuthService {
     // TODO - Change isVerified to true after mail confirmation [confirmEmail]
     async validateLogin(loginDto: AuthEmailLoginDto): Promise<any> {
         const user = await this.userService.validateUser({
-            isVerified: false,
+            isVerified: true,
             email: loginDto.email
         });
 

@@ -6,6 +6,7 @@ import { UpdatePostDto } from "./dto/update-post.dto";
 import { Post } from "./schemas/post.schema";
 import { User } from "../user/schemas/user.schema";
 import { PostDocument } from "./schemas/post.schema";
+import { PostResponseDto } from "./dto/post-response.dto";
 import { CloudinaryService } from "../cloudinary/cloudinary.service";
 import { NotificationService } from "../notification/notification.service";
 

@@ -41,8 +41,8 @@ export class PostResponseDto {
   isPublished: boolean;
 
   @ApiProperty()
-  createdAt: Date;
+  createdAt?: Date;
 
   @ApiProperty()
-  updatedAt: Date;
+  updatedAt?: Date;
 }
