@@ -20,7 +20,7 @@ import { UpdatePostDto } from "./dto/update-post.dto";
 import { JwtAuthGuard } from "../auth/guards/jwt-auth.guard";
 import { ApiTags, ApiBearerAuth, ApiResponse } from "@nestjs/swagger";
 import { LoggerService } from "../logger/logger.service";
-import { RolesGuard } from "./guards/roles.guard";
+import { RolesGuard } from "../auth/guards/roles.guard";
 import { Roles } from "../utils/decorators/roles.decorator";
 import { Role } from "../user/enums/role.enum";
 import { LikePostDto } from "./dto/like-post.dto";

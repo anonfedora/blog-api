@@ -130,7 +130,7 @@ export class AuthService {
         }
         await this.userService.update(user.id, {
             isVerified: true,
-            hash: null
+      
         });
     }
 
