@@ -8,27 +8,27 @@ export type CommentDocument = Comment & Document;
 
 @Schema({ timestamps: true })
 export class Comment {
-    @Prop({ type: String, required: true })
-    content: string;
+  @Prop({ type: String, required: true })
+  content: string;
 
-    @Prop({ type: mongoose.Schema.Types.ObjectId, ref: "User", required: true })
-    authorId: string;
+  @Prop({ type: mongoose.Schema.Types.ObjectId, ref: "User", required: true })
+  authorId: string;
 
-    @Prop({ type: mongoose.Schema.Types.ObjectId, ref: "Post" })
-    postId: Post;
+  @Prop({ type: mongoose.Schema.Types.ObjectId, ref: "Post" })
+  postId: Post;
 
-    //new
-    @Prop({ type: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }] })
-    likes: string[];
+  //new
+  @Prop({ type: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }] })
+  likes: string[];
 
-    @Prop({ default: 0 })
-    likesCount: number;
+  @Prop({ default: 0 })
+  likesCount: number;
 
-    @Prop({ type: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }] })
-    dislikes: string[];
+  @Prop({ type: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }] })
+  dislikes: string[];
 
-    @Prop({ default: 0 })
-    dislikesCount: number;
+  @Prop({ default: 0 })
+  dislikesCount: number;
 }
 
 export const CommentSchema = SchemaFactory.createForClass(Comment);
