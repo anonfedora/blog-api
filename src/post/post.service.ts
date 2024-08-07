@@ -85,13 +85,18 @@ export class PostService {
   ): Promise<Post | null> {
     const post = await this.postModel.findById(postId);
 
-    /*console.log(post);
-        console.log(post.authorId + "," + userId + "......");
-        console.log(post.authorId == userId);*/
     if (post.authorId == userId)
       return await this.postModel.findByIdAndUpdate(postId, updatePostDto, {
         new: true,
       });
+  }
+
+  async publishPost(postId: string, userId: string): Promise<Post | null> {
+    const post = await this.postModel.findById(postId);
+
+    if (post.authorId == userId)
+      await this.postModel.create({ isPublished: true });
+    return post;
   }
 
   async search(query: string): Promise<Post[] | null> {
@@ -119,7 +124,6 @@ export class PostService {
       post.dislikes = post.dislikes.filter((id) => id.toString() != userId);
       post.likesCount++;
     }
-    console.log("PostService - Like Post: post.authorId", post.authorId);
     await this.notificationService.createNotification(
       post.authorId,
       `${userId} liked your post`
