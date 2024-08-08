@@ -1,13 +1,13 @@
 import {
-    Controller,
-    Get,
-    Req,
-    Post,
-    Body,
-    Patch,
-    Param,
-    Delete,
-    UseGuards
+  Controller,
+  Get,
+  Req,
+  Post,
+  Body,
+  Patch,
+  Param,
+  Delete,
+  UseGuards,
 } from "@nestjs/common";
 import { CategoryService } from "./category.service";
 import { CreateCategoryDto } from "./dto/create-category.dto";
@@ -22,36 +22,38 @@ import { ApiTags } from "@nestjs/swagger";
 @ApiTags("category")
 @Controller("category")
 export class CategoryController {
-    constructor(private readonly categoryService: CategoryService) {}
+  constructor(private readonly categoryService: CategoryService) {}
 
-    @UseGuards(RolesGuard, JwtAuthGuard)
-    @Roles(Role.Guest)
-    @Post()
-    create(@Req() req, @Body() createCategoryDto: CreateCategoryDto): Promise<Category> {
-        const userId = req.user.sub;
-        return this.categoryService.create(userId, createCategoryDto);
-    }
+  @UseGuards(RolesGuard, JwtAuthGuard)
+  @Roles(Role.Admin, Role.User) //Admin/User  creation only
+  @Post()
+  create(
+    @Req() req,
+    @Body() createCategoryDto: CreateCategoryDto
+  ): Promise<Category> {
+    const userId = req.user.sub;
+    return this.categoryService.create(userId, createCategoryDto);
+  }
 
-    @Get()
-    findAll() {
-        return this.categoryService.findAll();
-    }
-    
-    @UseGuards(JwtAuthGuard)
-    //@Roles(Role.Admin)
-    @Patch(":id")
-    update(
-        @Param("id") id: string,
-        @Body() updateCategoryDto: UpdateCategoryDto
-    ): Promise<Category> {
-        return this.categoryService.update(id, updateCategoryDto);
-    }
+  @Get()
+  findAll() {
+    return this.categoryService.findAll();
+  }
 
+  @UseGuards(RolesGuard, JwtAuthGuard)
+  @Roles(Role.Admin) // Admin Category update only
+  @Patch(":id")
+  update(
+    @Param("id") id: string,
+    @Body() updateCategoryDto: UpdateCategoryDto
+  ): Promise<Category> {
+    return this.categoryService.update(id, updateCategoryDto);
+  }
 
-    @UseGuards( JwtAuthGuard)
-    //@Roles(Role.Admin)
-    @Delete(":id")
-    remove(@Param("id") id: string) {
-        return this.categoryService.remove(id);
-    }
+  @UseGuards(RolesGuard, JwtAuthGuard)
+  @Roles(Role.Admin) // Admin Category deletion only
+  @Delete(":id")
+  remove(@Param("id") id: string) {
+    return this.categoryService.remove(id);
+  }
 }
