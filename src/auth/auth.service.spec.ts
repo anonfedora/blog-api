@@ -11,9 +11,9 @@ import { AuthRegisterDto } from "./dto/auth-register.dto";
 import { AuthEmailLoginDto } from "./dto/auth-login.dto";
 import { UserDocument } from "../user/schemas/user.schema";
 import {
-    HttpException,
-    NotFoundException,
-    InternalServerErrorException
+  HttpException,
+  NotFoundException,
+  InternalServerErrorException,
 } from "@nestjs/common";
 import { Role } from "../user/enums/role.enum";
 
@@ -23,18 +23,18 @@ jest.mock("@nestjs/jwt");
 jest.mock("../mail/mail.service");
 
 describe("AuthService", () => {
-    let authService: AuthService;
-    let userService: UserService;
-    let configService: ConfigService;
-    let jwtService: JwtService;
-    let mailService: MailService;
+  let authService: AuthService;
+  let userService: UserService;
+  let configService: ConfigService;
+  let jwtService: JwtService;
+  let mailService: MailService;
 
-    beforeEach(async () => {
-        const module: TestingModule = await Test.createTestingModule({
-            providers: [
-                AuthService,
-                UserService,
-              /*  {
+  beforeEach(async () => {
+    const module: TestingModule = await Test.createTestingModule({
+      providers: [
+        AuthService,
+        UserService,
+        /*  {
                     provide: UserService,
                     useValue: {
                         createUser: jest.fn(),
@@ -42,19 +42,19 @@ describe("AuthService", () => {
                         findOne: jest.fn()
                     }
                 },*/
-                ConfigService,
-                JwtService,
-                MailService
-            ]
-        }).compile();
+        ConfigService,
+        JwtService,
+        MailService,
+      ],
+    }).compile();
 
-        authService = module.get<AuthService>(AuthService);
-        userService = module.get<UserService>(UserService);
-        configService = module.get<ConfigService>(ConfigService);
-        jwtService = module.get<JwtService>(JwtService);
-        mailService = module.get<MailService>(MailService);
-    });
-    /*
+    authService = module.get<AuthService>(AuthService);
+    userService = module.get<UserService>(UserService);
+    configService = module.get<ConfigService>(ConfigService);
+    jwtService = module.get<JwtService>(JwtService);
+    mailService = module.get<MailService>(MailService);
+  });
+  /*
     describe("register", () => {
         it("should register a new user and send a signup email", async () => {
             const authRegisterDto: AuthRegisterDto = {
@@ -118,136 +118,131 @@ describe("AuthService", () => {
         });
     });
 */
-    describe("confirmEmail", () => {
-        it("should confirm user email", async () => {
-            const user = {
-                id: "userId",
-                email: "test@example.com",
-                hash: "somehash"
-            };
+  describe("confirmEmail", () => {
+    it("should confirm user email", async () => {
+      const user = {
+        id: "userId",
+        email: "test@example.com",
+        hash: "somehash",
+      };
 
-            jest.spyOn(userService, "validateUser").mockResolvedValue(
-                user as any
-            );
-            jest.spyOn(userService, "update").mockResolvedValue(null);
+      jest.spyOn(userService, "validateUser").mockResolvedValue(user as any);
+      jest.spyOn(userService, "update").mockResolvedValue(null);
 
-            await authService.confirmEmail(user.hash);
+      await authService.confirmEmail(user.hash);
 
-            expect(userService.validateUser).toHaveBeenCalledWith({
-                hash: user.hash
-            });
-            expect(userService.update).toHaveBeenCalledWith(user.id, {
-                isVerified: true,
-                hash: null
-            });
-        });
-
-        it("should throw HttpException if user is not found", async () => {
-            jest.spyOn(userService, "validateUser").mockResolvedValue(null);
-
-            await expect(
-                authService.confirmEmail("invalidhash")
-            ).rejects.toThrow(HttpException);
-        });
+      expect(userService.validateUser).toHaveBeenCalledWith({
+        hash: user.hash,
+      });
+      expect(userService.update).toHaveBeenCalledWith(user.id, {
+        isVerified: true,
+      });
     });
 
-    describe("forgotPassword", () => {
-        it("should generate a reset token and send it via email", async () => {
-            const user = {
-                id: "userId",
-                email: "test@example.com",
-                save: jest.fn().mockResolvedValue(null)
-            };
+    it("should throw HttpException if user is not found", async () => {
+      jest.spyOn(userService, "validateUser").mockResolvedValue(null);
 
-            jest.spyOn(userService, "findOne").mockResolvedValue(user as any);
-            jest.spyOn(
-                userService,
-                "createPasswordResetToken"
-            ).mockResolvedValue("resetToken");
-            jest.spyOn(mailService, "forgotPassword").mockResolvedValue(null);
+      await expect(authService.confirmEmail("invalidhash")).rejects.toThrow(
+        HttpException
+      );
+    });
+  });
 
-            await authService.forgotPassword(user.email);
+  describe("forgotPassword", () => {
+    it("should generate a reset token and send it via email", async () => {
+      const user = {
+        id: "userId",
+        email: "test@example.com",
+        save: jest.fn().mockResolvedValue(null),
+      };
 
-            expect(userService.findOne).toHaveBeenCalledWith({
-                email: user.email
-            });
-            expect(userService.createPasswordResetToken).toHaveBeenCalledWith(
-                user.id
-            );
-            expect(user.save).toHaveBeenCalled();
-            expect(mailService.forgotPassword).toHaveBeenCalledWith({
-                to: user.email,
-                data: { resetToken: "resetToken" }
-            });
-        });
+      jest.spyOn(userService, "findOne").mockResolvedValue(user as any);
+      jest
+        .spyOn(userService, "createPasswordResetToken")
+        .mockResolvedValue("resetToken");
+      jest.spyOn(mailService, "forgotPassword").mockResolvedValue(null);
 
-        it("should throw NotFoundException if user is not found", async () => {
-            jest.spyOn(userService, "findOne").mockResolvedValue(null);
+      await authService.forgotPassword(user.email);
 
-            await expect(
-                authService.forgotPassword("nonexistent@example.com")
-            ).rejects.toThrow(NotFoundException);
-        });
-
-        it("should handle errors when sending email", async () => {
-            const user = {
-                id: "userId",
-                email: "test@example.com",
-                save: jest.fn().mockResolvedValue(null)
-            };
-
-            jest.spyOn(userService, "findOne").mockResolvedValue(user as any);
-            jest.spyOn(
-                userService,
-                "createPasswordResetToken"
-            ).mockResolvedValue("resetToken");
-            jest.spyOn(mailService, "forgotPassword").mockRejectedValue(
-                new Error("Mail error")
-            );
-
-            await expect(
-                authService.forgotPassword(user.email)
-            ).rejects.toThrow(InternalServerErrorException);
-            expect(user.save).toHaveBeenCalledTimes(2);
-        });
+      expect(userService.findOne).toHaveBeenCalledWith({
+        email: user.email,
+      });
+      expect(userService.createPasswordResetToken).toHaveBeenCalledWith(
+        user.id
+      );
+      expect(user.save).toHaveBeenCalled();
+      expect(mailService.forgotPassword).toHaveBeenCalledWith({
+        to: user.email,
+        data: { resetToken: "resetToken" },
+      });
     });
 
-    describe("me", () => {
-        it("should return user details", async () => {
-            const user = {
-                _id: "userId",
-                username: "testuser",
-                email: "test@example.com"
-            };
+    it("should throw NotFoundException if user is not found", async () => {
+      jest.spyOn(userService, "findOne").mockResolvedValue(null);
 
-            jest.spyOn(userService, "findOne").mockResolvedValue(user as any);
-
-            const result = await authService.me(user._id);
-
-            expect(result).toEqual(user);
-            expect(userService.findOne).toHaveBeenCalledWith({ _id: user._id });
-        });
+      await expect(
+        authService.forgotPassword("nonexistent@example.com")
+      ).rejects.toThrow(NotFoundException);
     });
 
-    describe("setCookie", () => {
-        it("should set a cookie in the response", () => {
-            const res = {
-                cookie: jest.fn()
-            } as any;
+    it("should handle errors when sending email", async () => {
+      const user = {
+        id: "userId",
+        email: "test@example.com",
+        save: jest.fn().mockResolvedValue(null),
+      };
 
-            const cookieName = "authCookie";
-            const cookieValue = "cookieValue";
-            const maxAge = 3600;
+      jest.spyOn(userService, "findOne").mockResolvedValue(user as any);
+      jest
+        .spyOn(userService, "createPasswordResetToken")
+        .mockResolvedValue("resetToken");
+      jest
+        .spyOn(mailService, "forgotPassword")
+        .mockRejectedValue(new Error("Mail error"));
 
-            jest.spyOn(configService, "getOrThrow").mockReturnValue(maxAge);
-
-            authService.setCookie(res, cookieName, cookieValue, maxAge);
-
-            expect(res.cookie).toHaveBeenCalledWith(cookieName, cookieValue, {
-                httpOnly: true,
-                sameSite: "strict",
-                maxAge
-            });
-        });
+      await expect(authService.forgotPassword(user.email)).rejects.toThrow(
+        InternalServerErrorException
+      );
+      expect(user.save).toHaveBeenCalledTimes(2);
     });
+  });
+
+  describe("me", () => {
+    it("should return user details", async () => {
+      const user = {
+        _id: "userId",
+        username: "testuser",
+        email: "test@example.com",
+      };
+
+      jest.spyOn(userService, "findOne").mockResolvedValue(user as any);
+
+      const result = await authService.me(user._id);
+
+      expect(result).toEqual(user);
+      expect(userService.findOne).toHaveBeenCalledWith({ _id: user._id });
+    });
+  });
+
+  describe("setCookie", () => {
+    it("should set a cookie in the response", () => {
+      const res = {
+        cookie: jest.fn(),
+      } as any;
+
+      const cookieName = "authCookie";
+      const cookieValue = "cookieValue";
+      const maxAge = 3600;
+
+      jest.spyOn(configService, "getOrThrow").mockReturnValue(maxAge);
+
+      authService.setCookie(res, cookieName, cookieValue, maxAge);
+
+      expect(res.cookie).toHaveBeenCalledWith(cookieName, cookieValue, {
+        httpOnly: true,
+        sameSite: "strict",
+        maxAge,
+      });
+    });
+  });
 }); // end of test suite
